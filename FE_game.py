@@ -25,7 +25,7 @@ class Cella(pygame.sprite.Sprite):
     def __init__(self, pos, size):
         super().__init__()
         self.pos = pos
-        self.image = pygame.image.load('cella.png')
+        self.image = pygame.image.load('background_assets/cella.png')
         self.rect = self.image.get_rect(topleft = pos)
 
 cursore=pygame.Surface((tile_size,tile_size))
