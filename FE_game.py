@@ -23,46 +23,50 @@ map=[                      #layout della mappa (per ora nun ci sta nu cazz, ma g
 tile_size= 50 #per ora ho messo 50 ma cambiando la dimensione schermo si dovrà modificare
 
 class Cella(pygame.sprite.Sprite):
-    def __init__(self, pos, size):
+    def __init__(self, pos, size, matrix_pos):
         super().__init__()
-        self.pos = pos
-        self.entities = None
+        self.pos = pos #posizione in pixel
+        self.x,self.y = matrix_pos #posizione sulla matrice
+        self.entities = None #se si trova un personaggio sopra quella casella
         self.image = pygame.image.load('background_assets/cella.png')
         self.rect = self.image.get_rect(topleft = pos)
-        self.flagged= False
+        self.flagged= False #Bool per controllare se la casella selezionate è questa
 
-cursore=pygame.Surface((tile_size,tile_size))
+cursore=pygame.Surface((tile_size,tile_size)) #quadratino grigio trasparente
 cursore.fill("#585858")
 cursore.set_alpha(150)
         
-
+matrix=[] #matrice con tutte le tiles trasformate in classe Cella
 tiles = pygame.sprite.Group()
 nani = pygame.sprite.Group()
 
 for n_riga, riga in enumerate(map): #per ogni riga
+    matrix_row=[]
     for n_colonna, tile in enumerate(riga): #e ogni colonna (quindi cella) della riga
         y = n_riga * tile_size #pos y cella
-        x = n_colonna * tile_size
-        cella=Cella((x,y),tile_size)
-        tiles.add(cella)
+        x = n_colonna * tile_size #pos x cella
+        cell=Cella((x,y), tile_size, (n_colonna, n_riga))
+        tiles.add(cell)
+        matrix_row.append(cell)
         if tile=='N':
-            nano=Personaggio((x,y), cella)
+            nano=Personaggio((x,y), cell)
             nani.add(nano)
-            cella.entities= nano
+            cell.entities= nano
+    matrix.append(matrix_row)
 
 
 
-possibili_mosse=None
+possibili_mosse=None #Inizializziamo vuota
 while True:
     key_input=pygame.key.get_pressed()
-    mouse=pygame.mouse.get_pos()
+    mouse=pygame.mouse.get_pos() #posizione mouse
     for tile in tiles:
         if tile.rect.collidepoint(mouse):
-            cella_attuale=tile
+            cella_attuale=tile #individuiamo quale cella stiamo guardando
     tiles.draw(screen)
     nani.draw(screen)
-    screen.blit(cursore,cella_attuale.pos)
-    if possibili_mosse:
+    screen.blit(cursore,cella_attuale.pos) #per disegnare le cose opache usiamo blit
+    if possibili_mosse: #tiles colorate blu
         for mossa in possibili_mosse:
             tile_opaca = pygame.Surface((tile_size,tile_size))
             tile_opaca.fill("#3E0FE6")
@@ -74,18 +78,19 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if cella_attuale.flagged:
+            if cella_attuale.flagged: #se clicchi di nuovo la stessa cella, rimuove gli attributi e torna a non averla selezionata
                 possibili_mosse = None
                 cella_attuale.flagged = False
                 flagged_cell= None
             else:
-                if possibili_mosse and cella_attuale in possibili_mosse:
-                    flagged_cell.entities.move(cella_attuale)
+                if possibili_mosse and cella_attuale in possibili_mosse: #se clicchi in uno dei "quadrati blu"
+                    flagged_cell.entities.move(cella_attuale) #muove la pedina in quel quadrato
+                    flagged_cell.flagged = False #e rimuove i dovuti attributi
                     possibili_mosse = None
                     cella_attuale.flagged = False
                     flagged_cell= None
-                elif cella_attuale.entities:
-                    possibili_mosse=cella_attuale.entities.calcola_mosse(tiles)
+                elif cella_attuale.entities: #se clicchi su una cella che ha un personaggio
+                    possibili_mosse=cella_attuale.entities.calcola_mosse2(matrix) #evidenzia le celle in cui esso può muoversi
                     cella_attuale.flagged = True
                     flagged_cell= cella_attuale
     pygame.display.update()
