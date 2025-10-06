@@ -14,8 +14,6 @@ class Personaggio(pygame.sprite.Sprite):
         self.parent = {} #questo servirà per costruire la freccia
 
         start = self.cur_cell
-        cur_x = start.x
-        cur_y = start.y
 
         rows = len(matrix)
         cols = len(matrix[0])
@@ -30,20 +28,20 @@ class Personaggio(pygame.sprite.Sprite):
         while len(queue) > 0: #finchè la coda non è vuota
             cell_, dist = queue.pop(0) #faccio il dequeue
             x, y = cell_.x, cell_.y
-            if dist >= max_dist: #se ho raggiunto la distanza massima, non faccio il resto
-                continue
 
             for dy, dx in directions: #calcolo le celle vicine
                 ny = y + dy
                 nx = x + dx
 
+                effective_dist = abs(nx - start.x) + abs(ny - start.y)
                 if 0 <= ny < rows and 0 <= nx < cols: # controlla che la cella sia dentro la mappa/matrice
                     cell = matrix[ny][nx]
                     if cell not in visited and cell.walkable: # controlla che la cella sia "valida"
                         visited.add(cell)
                         queue.append((matrix[ny][nx], dist + 1))
                         self.parent[matrix[ny][nx]] = cell_
-                        self.possibili_mosse.append(cell)
+                        if effective_dist <= max_dist:
+                            self.possibili_mosse.append(cell)
 
         return self.possibili_mosse
     def move(self, tile):

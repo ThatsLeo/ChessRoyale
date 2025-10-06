@@ -22,10 +22,10 @@ map=[                      #layout della mappa (per ora nun ci sta nu cazz, ma g
     '                ',
     '                ',
     '          N     ',
-    '                ',
-    '                ',
+    '          N     ',
     'N               ',
     ' N              ',
+    '  N             ',
 ]
 
 class Cella(pygame.sprite.Sprite):
