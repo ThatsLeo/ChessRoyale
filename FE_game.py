@@ -2,7 +2,14 @@ import pygame, sys
 from pygame.locals import *
 from personaggi import Personaggio
 fps=30
+tile_size= 50 #per ora ho messo 50 ma cambiando la dimensione schermo si dovrà modificare
 fpsclock=pygame.time.Clock()
+cell_img = pygame.image.load('background_assets/cella.png')
+arrow_point=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowpoint.png'),(tile_size,tile_size))
+arrow_line=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowline.png'),(tile_size,tile_size))
+arrow_curve=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowcurve.png'),(tile_size,tile_size))
+arrow_img=[arrow_line, arrow_curve,arrow_point]
+
 pygame.init()
 infoObject = pygame.display.Info()
 #schermox, schermoy = infoObject.current_w, infoObject.current_h   #per fare schermo intero
@@ -17,10 +24,9 @@ map=[                      #layout della mappa (per ora nun ci sta nu cazz, ma g
     '          N     ',
     '                ',
     '                ',
-    '                ',
-    '                ',
+    'N               ',
+    ' N              ',
 ]
-tile_size= 50 #per ora ho messo 50 ma cambiando la dimensione schermo si dovrà modificare
 
 class Cella(pygame.sprite.Sprite):
     def __init__(self, pos, size, matrix_pos):
@@ -28,9 +34,10 @@ class Cella(pygame.sprite.Sprite):
         self.pos = pos #posizione in pixel
         self.x,self.y = matrix_pos #posizione sulla matrice
         self.entities = None #se si trova un personaggio sopra quella casella
-        self.image = pygame.image.load('background_assets/cella.png')
+        self.image = cell_img
         self.rect = self.image.get_rect(topleft = pos)
         self.flagged= False #Bool per controllare se la casella selezionate è questa
+        self.walkable = True #Bool per verificare se si può camminare qui
 
 cursore=pygame.Surface((tile_size,tile_size)) #quadratino grigio trasparente
 cursore.fill("#585858")
@@ -52,6 +59,7 @@ for n_riga, riga in enumerate(map): #per ogni riga
             nano=Personaggio((x,y), cell)
             nani.add(nano)
             cell.entities= nano
+            cell.walkable = False
     matrix.append(matrix_row)
 
 
@@ -70,7 +78,7 @@ while True:
         for mossa in possibili_mosse:
             tile_opaca = pygame.Surface((tile_size,tile_size))
             tile_opaca.fill("#3E0FE6")
-            tile_opaca.set_alpha(150)
+            tile_opaca.set_alpha(100)
             screen.blit(tile_opaca, mossa.pos)
 
     for event in pygame.event.get():
@@ -90,7 +98,7 @@ while True:
                     cella_attuale.flagged = False
                     flagged_cell= None
                 elif cella_attuale.entities: #se clicchi su una cella che ha un personaggio
-                    possibili_mosse=cella_attuale.entities.calcola_mosse2(matrix) #evidenzia le celle in cui esso può muoversi
+                    possibili_mosse=cella_attuale.entities.calcola_mosse(matrix) #evidenzia le celle in cui esso può muoversi
                     cella_attuale.flagged = True
                     flagged_cell= cella_attuale
     pygame.display.update()
