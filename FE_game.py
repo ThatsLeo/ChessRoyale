@@ -1,14 +1,11 @@
 import pygame, sys
 from pygame.locals import *
 from personaggi import Personaggio
+from arrow_settings import arrowing
 fps=30
 tile_size= 50 #per ora ho messo 50 ma cambiando la dimensione schermo si dovrà modificare
 fpsclock=pygame.time.Clock()
 cell_img = pygame.image.load('background_assets/cella.png')
-arrow_point=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowpoint.png'),(tile_size,tile_size))
-arrow_line=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowline.png'),(tile_size,tile_size))
-arrow_curve=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowcurve.png'),(tile_size,tile_size))
-arrow_img=[arrow_line, arrow_curve,arrow_point]
 
 pygame.init()
 infoObject = pygame.display.Info()
@@ -23,7 +20,7 @@ map=[                      #layout della mappa (per ora nun ci sta nu cazz, ma g
     '                ',
     '          N     ',
     '          N     ',
-    'N               ',
+    'N          NN   ',
     ' N              ',
     '  N             ',
 ]
@@ -65,11 +62,14 @@ for n_riga, riga in enumerate(map): #per ogni riga
 
 
 possibili_mosse=None #Inizializziamo vuota
+cella_attuale=None
 while True:
     key_input=pygame.key.get_pressed()
     mouse=pygame.mouse.get_pos() #posizione mouse
     for tile in tiles:
         if tile.rect.collidepoint(mouse):
+            if cella_attuale!=tile:
+                cambio_cella = True
             cella_attuale=tile #individuiamo quale cella stiamo guardando
     tiles.draw(screen)
     nani.draw(screen)
@@ -80,6 +80,12 @@ while True:
             tile_opaca.fill("#3E0FE6")
             tile_opaca.set_alpha(100)
             screen.blit(tile_opaca, mossa.pos)
+        if cambio_cella and cella_attuale in possibili_mosse:
+            path = flagged_cell.entities.find_path(cella_attuale)
+            arrows, arrow_path = arrowing(path)
+            for n in range(len(arrow_path)):
+                arrow = arrows[n]
+                screen.blit(arrow.image, arrow.tile.pos)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

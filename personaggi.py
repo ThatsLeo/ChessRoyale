@@ -9,7 +9,7 @@ class Personaggio(pygame.sprite.Sprite):
         self.image = pygame.image.load('background_assets/nanodimerda.png')
         self.rect = self.image.get_rect(topleft = pos)
 
-    def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
+    def calcola_mosse(self, matrix, max_dist=5): #utilizzando BFS
         self.possibili_mosse = []
         self.parent = {} #questo servirà per costruire la freccia
 
@@ -36,7 +36,7 @@ class Personaggio(pygame.sprite.Sprite):
                 effective_dist = abs(nx - start.x) + abs(ny - start.y)
                 if 0 <= ny < rows and 0 <= nx < cols: # controlla che la cella sia dentro la mappa/matrice
                     cell = matrix[ny][nx]
-                    if cell not in visited and cell.walkable: # controlla che la cella sia "valida"
+                    if cell not in visited and cell.walkable and (cell_ in self.possibili_mosse or cell_==start): # controlla che la cella sia "valida"
                         visited.add(cell)
                         queue.append((matrix[ny][nx], dist + 1))
                         self.parent[matrix[ny][nx]] = cell_
@@ -44,6 +44,15 @@ class Personaggio(pygame.sprite.Sprite):
                             self.possibili_mosse.append(cell)
 
         return self.possibili_mosse
+    def find_path(self, tile):
+        path=[tile]
+        cur_tile = tile
+        while self.parent[cur_tile]:
+            path.append(self.parent[cur_tile])
+            cur_tile=self.parent[cur_tile]
+        path.append(self.cur_cell) #aggiungo un elemento finale che rappresenta l'inizio della freccia
+        return path
+
     def move(self, tile):
         self.pos = tile.pos
         self.cur_cell.entities = None

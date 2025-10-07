@@ -8,12 +8,6 @@ a=[
     [0,0,0,1,0,0,0,0],
     ]
 
-coda=[0,1,2]
-i = coda[0]
-coda=coda[1:]
-
-n=0
-while n<5:
-    print('a')
-    continue
-    n+=1
+coda=[0,1,2,3,4,5,6]
+for i in range(len(coda)):
+    print(i)
