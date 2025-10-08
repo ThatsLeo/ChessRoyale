@@ -74,17 +74,18 @@ while True:
     tiles.draw(screen)
     nani.draw(screen)
     screen.blit(cursore,cella_attuale.pos) #per disegnare le cose opache usiamo blit
-    if possibili_mosse: #tiles colorate blu
-        for mossa in possibili_mosse:
+    if possibili_mosse:
+        for mossa in possibili_mosse: #tiles colorate blu
             tile_opaca = pygame.Surface((tile_size,tile_size))
             tile_opaca.fill("#3E0FE6")
             tile_opaca.set_alpha(100)
             screen.blit(tile_opaca, mossa.pos)
-        if cambio_cella and cella_attuale in possibili_mosse:
+        if cambio_cella and cella_attuale in possibili_mosse: # calcolo la freccia solo quando il cursore si sposta di casella
             path = flagged_cell.entities.find_path(cella_attuale)
             arrows, arrow_path = arrowing(path)
-            for n in range(len(arrow_path)):
-                arrow = arrows[n]
+            cambio_cella = False
+        if cella_attuale in possibili_mosse:
+            for arrow in arrows:
                 screen.blit(arrow.image, arrow.tile.pos)
 
     for event in pygame.event.get():
