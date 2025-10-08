@@ -8,6 +8,11 @@ a=[
     [0,0,0,1,0,0,0,0],
     ]
 
-coda=[0,1,2,3,4,5,6]
-for i in range(len(coda)):
-    print(i)
+class Gio:
+    def __init__(self, ciao):
+        a='a'
+        self.a=ciao
+
+i = Gio('b')
+print(getattr(i, 'a'))
+print(getattr(i, 'self.a'))

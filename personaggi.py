@@ -2,15 +2,19 @@ import pygame
 from pygame.locals import *
 
 class Personaggio(pygame.sprite.Sprite):
-    def __init__(self, pos, start_cell):
+    def __init__(self, pos, start_cell, team):
         super().__init__()
         self.pos = pos #posizione in pixel
         self.cur_cell = start_cell #relativa cella in cui è dentro
         self.image = pygame.image.load('background_assets/nanodimerda.png')
         self.rect = self.image.get_rect(topleft = pos)
+        self.team = team
+        if self.team==1:
+            self.image=pygame.transform.rotate(self.image, 180)
 
     def calcola_mosse(self, matrix, max_dist=5): #utilizzando BFS
         self.possibili_mosse = []
+        self.mosse_totali = []
         self.parent = {} #questo servirà per costruire la freccia
 
         start = self.cur_cell
@@ -36,12 +40,14 @@ class Personaggio(pygame.sprite.Sprite):
                 effective_dist = abs(nx - start.x) + abs(ny - start.y)
                 if 0 <= ny < rows and 0 <= nx < cols: # controlla che la cella sia dentro la mappa/matrice
                     cell = matrix[ny][nx]
-                    if cell not in visited and cell.walkable and (cell_ in self.possibili_mosse or cell_==start): # controlla che la cella sia "valida"
+                    if cell not in visited and (cell.walkable or getattr(cell.entities, "team", None)==self.team) and (cell_ in self.mosse_totali or cell_==start): # controlla che la cella sia "valida"
                         visited.add(cell)
                         queue.append((matrix[ny][nx], dist + 1))
                         self.parent[matrix[ny][nx]] = cell_
                         if effective_dist <= max_dist:
-                            self.possibili_mosse.append(cell)
+                            if getattr(cell.entities, "team", None)!=self.team:
+                                self.possibili_mosse.append(cell)
+                            self.mosse_totali.append(cell) # mosse totali include le pedine alleate
 
         return self.possibili_mosse
     def find_path(self, tile):

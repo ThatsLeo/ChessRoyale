@@ -20,8 +20,8 @@ map=[                      #layout della mappa (per ora nun ci sta nu cazz, ma g
     '                ',
     '          N     ',
     '          N     ',
-    'N          NN   ',
-    ' N              ',
+    'M          MN   ',
+    ' M              ',
     '  N             ',
 ]
 
@@ -53,7 +53,12 @@ for n_riga, riga in enumerate(map): #per ogni riga
         tiles.add(cell)
         matrix_row.append(cell)
         if tile=='N':
-            nano=Personaggio((x,y), cell)
+            nano=Personaggio((x,y), cell, 0)
+            nani.add(nano)
+            cell.entities= nano
+            cell.walkable = False
+        if tile=='M':
+            nano=Personaggio((x,y), cell, 1)
             nani.add(nano)
             cell.entities= nano
             cell.walkable = False
