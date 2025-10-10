@@ -24,6 +24,19 @@ map=[                      #layout della mappa (per ora nun ci sta nu cazz, ma g
     ' M              ',
     '  N             ',
 ]
+map=[
+    'M       ',
+    '  M     ',
+    '        ',
+    '        ',
+    '        ',
+    '        ',
+    '        ',
+    '   N    ',
+    ' N      ',
+    '        ',
+]
+
 
 class Cella(pygame.sprite.Sprite):
     def __init__(self, pos, size, matrix_pos):
