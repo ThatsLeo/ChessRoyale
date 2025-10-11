@@ -1,5 +1,4 @@
 import pygame
-from pygame.locals import *
 
 class Personaggio(pygame.sprite.Sprite):
     def __init__(self, pos, start_cell, team):

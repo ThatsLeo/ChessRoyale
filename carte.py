@@ -1,5 +1,4 @@
 import pygame, sys
-from pygame.locals import *
 
 pygame.init()
 schermox, schermoy = 800,500
@@ -51,8 +50,7 @@ for i in range(5): c.append(Carta())
 carte = Menu_Carte_Aperto(c)
 
 
-
-card_clicked = False
+toggle = False
 while True:
     screen.fill("Black")
     key_input=pygame.key.get_pressed()
@@ -67,18 +65,19 @@ while True:
         if event.type == pygame.MOUSEBUTTONUP:
             mouse_pos = pygame.mouse.get_pos()
             if carte.show:
+                card_clicked = False
                 for card in carte.carte:
                     if card.rect.collidepoint(mouse_pos):
                         card_clicked = True
                         pass # usa quella carta
-                if not card_clicked: #se non clicchi una carta, esci dal menu
-                    menu_carte.toggle()
-                    carte.toggle()
+                toggle = not card_clicked
             if menu_carte.show and menu_carte.rect.collidepoint(mouse_pos):
                 carte.calcola_pos()
+                toggle = True
+            if toggle:
                 menu_carte.toggle()
                 carte.toggle()
-                
+            toggle = False
 
     pygame.display.update()
     clock.tick(30)
