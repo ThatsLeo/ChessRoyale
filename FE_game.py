@@ -1,31 +1,33 @@
 import pygame, sys
-from pygame.locals import *
 from arrow_settings import arrowing
 from map_settings import *
+from game_settings import *
 fpsclock=pygame.time.Clock()
 
 pygame.init()
 infoObject = pygame.display.Info()
 #schermox, schermoy = infoObject.current_w, infoObject.current_h   #per fare schermo intero
 screen=pygame.display.set_mode((schermox,schermoy))
-        
-
-
-
-
 possibili_mosse=None #Inizializziamo vuota
 cella_attuale=None
+
+
+
+
+turno = 0
+
 while True:
     key_input=pygame.key.get_pressed()
     mouse=pygame.mouse.get_pos() #posizione mouse
-    for tile in tiles:
+    for tile in map.tiles:
         if tile.rect.collidepoint(mouse):
             if cella_attuale!=tile:
                 cambio_cella = True
             cella_attuale=tile #individuiamo quale cella stiamo guardando
-    tiles.draw(screen)
+    map.tiles.draw(screen)
     nani.draw(screen)
     screen.blit(cursore,cella_attuale.pos) #per disegnare le cose opache usiamo blit
+    screen.blit(zona_nemica,(0,0))
     if possibili_mosse:
         for mossa in possibili_mosse: #tiles colorate blu
             tile_opaca = pygame.Surface((tile_size,tile_size))
@@ -56,9 +58,15 @@ while True:
                     possibili_mosse = None
                     cella_attuale.flagged = False
                     flagged_cell= None
+
+                    # per ora il turno finisce quando muovi una pedina:
+                    #map.update_map(turno)   DA FIXAREEEE
+                    turno = abs(turno-1) 
+
                 elif cella_attuale.entities: #se clicchi su una cella che ha un personaggio
-                    possibili_mosse=cella_attuale.entities.calcola_mosse(matrix) #evidenzia le celle in cui esso può muoversi
-                    cella_attuale.flagged = True
-                    flagged_cell= cella_attuale
+                    if turno == cella_attuale.entities.team: # puoi cliccare solo le pedine della squadra a cui tocca
+                        possibili_mosse=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
+                        cella_attuale.flagged = True
+                        flagged_cell= cella_attuale
     pygame.display.update()
     fpsclock.tick(fps)

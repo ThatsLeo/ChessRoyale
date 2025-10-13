@@ -1,6 +1,6 @@
 import pygame
+from game_settings import tile_size
 
-tile_size=50
 arrow_point=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowpoint.png'),(tile_size,tile_size))
 arrow_line=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowline.png'),(tile_size,tile_size))
 arrow_curve=pygame.transform.scale(pygame.image.load('background_assets/arrow/arrowcurve.png'),(tile_size,tile_size))

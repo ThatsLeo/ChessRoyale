@@ -1,17 +1,21 @@
 import pygame
+from game_settings import tile_size
 
 class Personaggio(pygame.sprite.Sprite):
-    def __init__(self, pos, start_cell, team):
+    def __init__(self, start_cell, team):
         super().__init__()
-        self.pos = pos #posizione in pixel
+        self.pos = start_cell.pos #posizione in pixel
         self.cur_cell = start_cell #relativa cella in cui è dentro
         self.image = pygame.image.load('background_assets/nanodimerda.png')
-        self.rect = self.image.get_rect(topleft = pos)
+        self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
+        self.rect = self.image.get_rect(topleft = self.pos)
         self.team = team
         if self.team==1:
             self.image=pygame.transform.rotate(self.image, 180)
-
-    def calcola_mosse(self, matrix, max_dist=5): #utilizzando BFS
+    def update(self):
+        self.pos = self.cur_cell.pos
+        self.rect = self.image.get_rect(topleft = self.pos)
+    def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
         self.possibili_mosse = []
         self.mosse_totali = []
         self.parent = {} #questo servirà per costruire la freccia

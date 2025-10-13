@@ -8,11 +8,8 @@ a=[
     [0,0,0,1,0,0,0,0],
     ]
 
-class Gio:
-    def __init__(self, ciao):
-        a='a'
-        self.a=ciao
-
-i = Gio('b')
-print(getattr(i, 'a'))
-print(getattr(i, 'self.a'))
+import random
+a=[0,1,2,3,4,5,6,7,8,9,10]
+print(len(a))
+print(a[:4])
+print(a[4:-1])
