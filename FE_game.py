@@ -30,9 +30,6 @@ while True:
     screen.blit(zona_nemica,(0,0))
     if possibili_mosse:
         for mossa in possibili_mosse: #tiles colorate blu
-            tile_opaca = pygame.Surface((tile_size,tile_size))
-            tile_opaca.fill("#3E0FE6")
-            tile_opaca.set_alpha(100)
             screen.blit(tile_opaca, mossa.pos)
         if cambio_cella and cella_attuale in possibili_mosse: # calcolo la freccia solo quando il cursore si sposta di casella
             path = flagged_cell.entities.find_path(cella_attuale)
@@ -60,7 +57,7 @@ while True:
                     flagged_cell= None
 
                     # per ora il turno finisce quando muovi una pedina:
-                    #map.update_map(turno)   DA FIXAREEEE
+                    map.update_map(turno)
                     turno = abs(turno-1) 
 
                 elif cella_attuale.entities: #se clicchi su una cella che ha un personaggio
