@@ -4,7 +4,7 @@ import time
 pygame.init()
 
 fps = 60
-schermox, schermoy = 1280,720
+schermox, schermoy = 1820,1000
 screen=pygame.display.set_mode((schermox,schermoy), pygame.RESIZABLE)
 
 class RunningPoint:
@@ -34,10 +34,11 @@ class Menu(pygame.sprite.Sprite):
         self.highlighted_option = 0
         self.selected_option = -1
 
-        self.size = [width, height]
+        self.box_size = [width, height]
         self.screen = screen
         self.options = []
         self.screenWidth, self.screenHeight = screen.get_size()
+        self.ratio = width / height
 
         if color is None:
             color = (255, 255, 255)
@@ -63,18 +64,19 @@ class Menu(pygame.sprite.Sprite):
     def window_state(self):
         return self.active
 
+    # Disegna il menu con le relative opzioni con un paddding centrato verticalmente nel box
     def draw(self):
         if self.active:
             pygame.draw.rect(self.screen, self.color, self.rect, self.borderWidth) 
             
             option_size = [None, None] 
             
-            option_size[0] = int(self.size[0] / 3)
-            option_size[1] = int(self.size[1] / 6)
+            option_size[0] = int(self.box_size[0] / 3)
+            option_size[1] = int(self.box_size[1] / 6)
             paddingY = self.screenHeight * 0.02
 
-            xPos = self.screenWidth / 2 - option_size[0] / 2
-            yPos = self.screenHeight / 2 - (option_size[1] / 2) * len(self.options) - paddingY
+            xPos = self.x + (self.box_size[0] / 2) - (option_size[0] / 2)
+            yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * len(self.options) - paddingY
             for option in range(len(self.options)):
                 if option == self.highlighted_option:
                     pygame.draw.rect(self.screen, (255, 0, 0), (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
@@ -82,6 +84,7 @@ class Menu(pygame.sprite.Sprite):
                     pygame.draw.rect(self.screen, self.color, (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
                 yPos += option_size[1] + paddingY
 
+    # Gestione dei keypress da tastiera, solo se il menu è attivo(non ancora gestisce il mouse)
     def handle_event(self, event):
         match event.key:
             case pygame.K_SPACE:
@@ -102,19 +105,29 @@ class Menu(pygame.sprite.Sprite):
         elif self.highlighted_option >= len(self.options): 
             self.highlighted_option = 0
 
+    # Resize del menu in base alla nuova dimensione della finestra
     def resize(self, new_width, new_height):
         if new_width > self.screenWidth:
-            self.size[0] += (new_width - self.screenWidth) / 2
-        elif new_width < self.screenWidth:
-            self.size[0] -= (self.screenWidth - new_width) / 2
+            self.box_size[0] += (new_width - self.screenWidth) / 2
+            self.box_size[1] += (new_width - self.screenWidth) * (self.ratio / 2)
         
+        elif new_width < self.screenWidth:
+            self.box_size[0] -= (self.screenWidth - new_width) / 2
+            self.box_size[1] -= (self.screenWidth - new_width) * (self.ratio / 2)
+
 
         if new_height > self.screenHeight:
-            self.size[1] += (new_height - self.screenHeight) / 2
+            self.box_size[1] += (new_height - self.screenHeight) / 2
+            self.box_size[0] += (new_height - self.screenHeight) * (self.ratio / 2)
+
         elif new_height < self.screenHeight:
-            self.size[1] -= (self.screenHeight - new_height) / 2
+            self.box_size[1] -= (self.screenHeight - new_height) / 2
+            self.box_size[0] -= (self.screenHeight - new_height) * (self.ratio / 2)
 
         self.screenWidth, self.screenHeight = new_width, new_height
+        self.x = (self.screenWidth - self.box_size[0]) // 2
+        self.y = (self.screenHeight - self.box_size[1]) // 2
+        self.rect = pygame.Rect(self.x, self.y, self.box_size[0], self.box_size[1])
         
 
 
