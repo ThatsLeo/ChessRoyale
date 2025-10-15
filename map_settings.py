@@ -31,6 +31,11 @@ class Cella(pygame.sprite.Sprite):
                 self.image = mount_img
                 self.walkable = False
         self.rect = self.image.get_rect(topleft = pos)
+    def shift(self, shift): #shift 1 se scende, -1 se sale
+        self.pos = (self.pos[0],self.pos[1]+shift*tile_size)
+        self.x,self.y = self.x, self.y+shift
+        self.rect = self.image.get_rect(topleft = self.pos)
+
 
 
 matrix=[] #matrice con tutte le tiles trasformate in classe Cella
@@ -71,25 +76,37 @@ class Map:
         weights = [7, 1]
         return choices(tile_grounds, weights=weights)[0]
     def update_map(self, turn):
-        int(len(self.matrix)/2)
         new_row=[]
         half = int(len(self.matrix)/2)
         if turn == 0: #ha appena giocato il giocatore sotto
             for cell in self.matrix[int(len(self.matrix)/2)]:
                 new_row.append(Cella(cell.pos, (cell.x, cell.y), self.generate_tile())) #creo nuove celle nella nuova row usando la funzione random
+            self.tiles.remove(self.matrix[-1])
+            self.tiles.add(new_row)
             new_matrix = self.matrix[:half]
-            m = self.matrix[half:-1]
             new_matrix.append(new_row)
+            m = self.matrix[half:-1]
+            for row in m:
+                for tile in row:
+                    tile.shift(1)
             new_matrix.extend(m)
         else:
-            for cell in self.matrix[int(len(self.matrix)/2)]:
+            for cell in self.matrix[int(len(self.matrix)/2)-1]:
                 new_row.append(Cella(cell.pos, (cell.x, cell.y), self.generate_tile())) #creo nuove celle nella nuova row usando la funzione random
+            self.tiles.remove(self.matrix[0])
+            self.tiles.add(new_row)
             new_matrix = self.matrix[half:]
-            m =self. matrix[1:half]
-            new_matrix.append(new_row)
-            new_matrix.extend(m)
+            m = self.matrix[1:half]
+            for row in m:
+                for tile in row: tile.shift(-1)
+            m.append(new_row)
+            m.extend(new_matrix)
+            new_matrix = m
         self.matrix = new_matrix
-        self.tiles = pygame.sprite.Group([x for xs in new_matrix for x in xs])
+        for n in nani:
+            if n.cur_cell not in self.tiles:
+                nani.remove(n)
+            n.update()
 map=Map()
 
 
@@ -103,4 +120,7 @@ zona_nemica=pygame.Surface((schermox,schermoy/2)) #zona rossa trasparente
 zona_nemica.fill("#E20E0E")
 zona_nemica.set_alpha(50)
 
+tile_opaca = pygame.Surface((tile_size,tile_size))
+tile_opaca.fill("#3E0FE6")
+tile_opaca.set_alpha(100)
 

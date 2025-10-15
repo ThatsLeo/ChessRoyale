@@ -8,8 +8,6 @@ a=[
     [0,0,0,1,0,0,0,0],
     ]
 
-import random
-a=[0,1,2,3,4,5,6,7,8,9,10]
-print(len(a))
-print(a[:4])
-print(a[4:-1])
+a= (0,1)
+b = (1,0)
+print(a+b)
