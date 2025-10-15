@@ -3,9 +3,9 @@ import time
 
 pygame.init()
 
-fps = 12
-schermox, schermoy = 800,500
-screen=pygame.display.set_mode((schermox,schermoy))
+fps = 60
+schermox, schermoy = 1280,720
+screen=pygame.display.set_mode((schermox,schermoy), pygame.RESIZABLE)
 
 class RunningPoint:
     def __init__(self, screen_width, screen_height, time: float):
@@ -27,15 +27,22 @@ class RunningPoint:
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, self.xpos, self.ypos))
 
-class Menu:
+class Menu(pygame.sprite.Sprite):
     def __init__(self, screen: pygame.display, width: int, height: int, borderWidth: int, color=(int, int, int)):
+        super().__init__()
+
+        self.highlighted_option = 0
+        self.selected_option = -1
+
+        self.size = [width, height]
         self.screen = screen
+        self.options = []
+        self.screenWidth, self.screenHeight = screen.get_size()
+
         if color is None:
             color = (255, 255, 255)
         else: 
             self.color = color
-        
-        self.screenWidth, self.screenHeight = screen.get_size()
         
         if height > self.screenHeight or width > self.screenWidth:
             raise ValueError("Menu dimensions exceed screen dimensions")
@@ -58,10 +65,69 @@ class Menu:
 
     def draw(self):
         if self.active:
-            pygame.draw.rect(self.screen, self.color, self.rect, self.borderWidth)
+            pygame.draw.rect(self.screen, self.color, self.rect, self.borderWidth) 
+            
+            option_size = [None, None] 
+            
+            option_size[0] = int(self.size[0] / 3)
+            option_size[1] = int(self.size[1] / 6)
+            paddingY = self.screenHeight * 0.02
+
+            xPos = self.screenWidth / 2 - option_size[0] / 2
+            yPos = self.screenHeight / 2 - (option_size[1] / 2) * len(self.options) - paddingY
+            for option in range(len(self.options)):
+                if option == self.highlighted_option:
+                    pygame.draw.rect(self.screen, (255, 0, 0), (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
+                else:
+                    pygame.draw.rect(self.screen, self.color, (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
+                yPos += option_size[1] + paddingY
+
+    def handle_event(self, event):
+        match event.key:
+            case pygame.K_SPACE:
+                if self.window_state():
+                    self.deactivate()
+                else:
+                    self.activate()
+            case pygame.K_UP:
+                if self.window_state():
+                    self.highlighted_option -= 1
+            case pygame.K_DOWN:
+                if self.window_state():
+                    self.highlighted_option += 1
+            case _:
+                pass
+        if self.highlighted_option < 0: 
+            self.highlighted_option = len(self.options) - 1
+        elif self.highlighted_option >= len(self.options): 
+            self.highlighted_option = 0
+
+    def resize(self, new_width, new_height):
+        if new_width > self.screenWidth:
+            self.size[0] += (new_width - self.screenWidth) / 2
+        elif new_width < self.screenWidth:
+            self.size[0] -= (self.screenWidth - new_width) / 2
+        
+
+        if new_height > self.screenHeight:
+            self.size[1] += (new_height - self.screenHeight) / 2
+        elif new_height < self.screenHeight:
+            self.size[1] -= (self.screenHeight - new_height) / 2
+
+        self.screenWidth, self.screenHeight = new_width, new_height
+        
+
+
+            
+
+    def set_options(self,lista: list[str] ):
+        for opzione in lista:
+            self.options.append(opzione)
+
 
 # Inizializzazione
-menu = Menu(screen, 400, 300, 5, color=(200, 200, 200))
+menu = Menu(screen, 400, 300, 3, color=(200, 200, 200))
+menu.set_options(["Start Game", "Options", "Exit"])
 running_point = RunningPoint(schermox, schermoy, 0.01)
 clock = pygame.time.Clock()
 
@@ -78,11 +144,10 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if menu.window_state():
-                    menu.deactivate()
-                else:
-                    menu.activate()
+            menu.handle_event(event)
+        elif event.type == pygame.VIDEORESIZE:
+            menu.resize(event.w, event.h)
+            
 
     # Ogni running_point.time secondi vengono aggiornate le coordinate del punto
     if current_time - last_running_point_update >= running_point.time:
