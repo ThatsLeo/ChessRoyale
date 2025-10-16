@@ -4,7 +4,7 @@ import time
 pygame.init()
 
 fps = 60
-schermox, schermoy = 1820,1000
+schermox, schermoy = 1280,720
 screen=pygame.display.set_mode((schermox,schermoy), pygame.RESIZABLE)
 
 class RunningPoint:
@@ -39,6 +39,8 @@ class Menu(pygame.sprite.Sprite):
         self.options = []
         self.screenWidth, self.screenHeight = screen.get_size()
         self.ratio = width / height
+        self.original_size = (width, height)
+        self.original_screen_size = (self.screenWidth, self.screenHeight)
 
         if color is None:
             color = (255, 255, 255)
@@ -107,31 +109,36 @@ class Menu(pygame.sprite.Sprite):
 
     # Resize del menu in base alla nuova dimensione della finestra
     def resize(self, new_width, new_height):
-        if new_width > self.screenWidth:
-            self.box_size[0] += (new_width - self.screenWidth) / 2
-            self.box_size[1] += (new_width - self.screenWidth) * (self.ratio / 2)
+        # evita operazioni inutili se non cambia
+        if new_width == self.screenWidth and new_height == self.screenHeight:
+            return
+
+        ow, oh = self.original_size
+        osw, osh = self.original_screen_size
+
+        scale_w = new_width / osw if osw > 0 else 1.0
+        scale_h = new_height / osh if osh > 0 else 1.0
         
-        elif new_width < self.screenWidth:
-            self.box_size[0] -= (self.screenWidth - new_width) / 2
-            self.box_size[1] -= (self.screenWidth - new_width) * (self.ratio / 2)
+        scale = min(scale_w, scale_h)
 
+        new_box_w = max(1, int(round(ow * scale)))
+        new_box_h = max(1, int(round(oh * scale)))
 
-        if new_height > self.screenHeight:
-            self.box_size[1] += (new_height - self.screenHeight) / 2
-            self.box_size[0] += (new_height - self.screenHeight) * (self.ratio / 2)
+        max_w = max(1, new_width - 2 * self.borderWidth)
+        max_h = max(1, new_height - 2 * self.borderWidth)
+        new_box_w = min(new_box_w, max_w)
+        new_box_h = min(new_box_h, max_h)
 
-        elif new_height < self.screenHeight:
-            self.box_size[1] -= (self.screenHeight - new_height) / 2
-            self.box_size[0] -= (self.screenHeight - new_height) * (self.ratio / 2)
+        min_box_w, min_box_h = 100, 80
+        new_box_w = max(min_box_w, new_box_w)
+        new_box_h = max(min_box_h, new_box_h)
 
+        self.box_size[0], self.box_size[1] = new_box_w, new_box_h
         self.screenWidth, self.screenHeight = new_width, new_height
         self.x = (self.screenWidth - self.box_size[0]) // 2
         self.y = (self.screenHeight - self.box_size[1]) // 2
-        self.rect = pygame.Rect(self.x, self.y, self.box_size[0], self.box_size[1])
+        self.rect = pygame.Rect(int(self.x), int(self.y), int(self.box_size[0]), int(self.box_size[1]))
         
-
-
-            
 
     def set_options(self,lista: list[str] ):
         for opzione in lista:
