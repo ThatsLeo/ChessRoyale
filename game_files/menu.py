@@ -1,3 +1,4 @@
+import window_handler
 import pygame, sys
 import time
 
@@ -5,7 +6,7 @@ pygame.init()
 
 fps = 60
 schermox, schermoy = 1280,720
-screen=pygame.display.set_mode((schermox,schermoy), pygame.RESIZABLE)
+finestra = window_handler.window(schermox, schermoy, fps)
 
 class RunningPoint:
     def __init__(self, screen_width, screen_height, time: float):
@@ -108,37 +109,18 @@ class Menu(pygame.sprite.Sprite):
             self.highlighted_option = 0
 
     # Resize del menu in base alla nuova dimensione della finestra
-    def resize(self, new_width, new_height):
-        # evita operazioni inutili se non cambia
-        if new_width == self.screenWidth and new_height == self.screenHeight:
-            return
+    def resize(self):
+        new_width, new_height = self.screen.get_size()
+        if new_width != self.screenWidth or new_height != self.screenHeight:
+            self.box_size[0] = (new_width * self.original_size[0]) // self.original_screen_size[0]
+            self.box_size[1] = (self.box_size[0] * self.original_size[1]) // self.original_size[0]
 
-        ow, oh = self.original_size
-        osw, osh = self.original_screen_size
-
-        scale_w = new_width / osw if osw > 0 else 1.0
-        scale_h = new_height / osh if osh > 0 else 1.0
-        
-        scale = min(scale_w, scale_h)
-
-        new_box_w = max(1, int(round(ow * scale)))
-        new_box_h = max(1, int(round(oh * scale)))
-
-        max_w = max(1, new_width - 2 * self.borderWidth)
-        max_h = max(1, new_height - 2 * self.borderWidth)
-        new_box_w = min(new_box_w, max_w)
-        new_box_h = min(new_box_h, max_h)
-
-        min_box_w, min_box_h = 100, 80
-        new_box_w = max(min_box_w, new_box_w)
-        new_box_h = max(min_box_h, new_box_h)
-
-        self.box_size[0], self.box_size[1] = new_box_w, new_box_h
         self.screenWidth, self.screenHeight = new_width, new_height
         self.x = (self.screenWidth - self.box_size[0]) // 2
         self.y = (self.screenHeight - self.box_size[1]) // 2
-        self.rect = pygame.Rect(int(self.x), int(self.y), int(self.box_size[0]), int(self.box_size[1]))
+        self.rect = pygame.Rect(self.x, self.y, self.box_size[0], self.box_size[1])
         
+            
 
     def set_options(self,lista: list[str] ):
         for opzione in lista:
@@ -146,7 +128,7 @@ class Menu(pygame.sprite.Sprite):
 
 
 # Inizializzazione
-menu = Menu(screen, 400, 300, 3, color=(200, 200, 200))
+menu = Menu(finestra.screen, 400, 300, 3, color=(200, 200, 200))
 menu.set_options(["Start Game", "Options", "Exit"])
 running_point = RunningPoint(schermox, schermoy, 0.01)
 clock = pygame.time.Clock()
@@ -163,11 +145,15 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        
         elif event.type == pygame.KEYDOWN:
             menu.handle_event(event)
+        
         elif event.type == pygame.VIDEORESIZE:
-            menu.resize(event.w, event.h)
-            
+            finestra.resize(event.w, event.h)
+            menu.screen = finestra.screen
+            menu.resize()
+
 
     # Ogni running_point.time secondi vengono aggiornate le coordinate del punto
     if current_time - last_running_point_update >= running_point.time:
@@ -179,10 +165,10 @@ while True:
         last_update_time = current_time
         
         # Pulisce lo schermo
-        screen.fill((0, 0, 0))
+        finestra.screen.fill((0, 0, 0))
         
         # Disegna tutto
-        running_point.draw(screen)
+        running_point.draw(finestra.screen)
         menu.draw()
         
         # Mostra le modifiche

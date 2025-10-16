@@ -2,20 +2,29 @@ import pygame, sys
 
 class window():
     def __init__(self, width, height, fps):
+        self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self.width = width
         self.height = height
         self.fps = fps
+        self.ratio = width / height
 
-    def resize(self, width, height):
-        self.width = width
-        self.height = height
+    def resize(self, new_width, new_height):
+        if new_width != self.width:
+            self.width = new_width
+            self.height = int(new_width / self.ratio)
+        elif new_height != self.height:
+            self.height = new_height
+            self.width = int(new_height * self.ratio)
+        
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
+
 
     def set_fps(self, fps):
         self.fps = fps
 
     def get_fps(self):
         return self.fps
-
+"""
 pygame.init()
 
 screen_info = window(300, 300, 30)
@@ -24,9 +33,6 @@ htiles = 16
 wtiles = 10
 
 tile_size = 48
-
-screen = pygame.display.set_mode((screen_info.width, screen_info.height), pygame.RESIZABLE)
-
 
 def check_tile_size():
     global tile_size
@@ -60,10 +66,10 @@ def draw_grid():
         for col in range(wtiles):
             x = start_x + col * tile_size
             y = start_y + row * tile_size
-            screen.blit(scaled_image, (x, y))
-            screen.blit(scaled_nano, (x, y))
-            pygame.draw.rect(screen, (255, 255, 255), (x, y, tile_size, tile_size), 1)
-            
+            screen_info.screen.blit(scaled_image, (x, y))
+            screen_info.screen.blit(scaled_nano, (x, y))
+            pygame.draw.rect(screen_info.screen, (255, 255, 255), (x, y, tile_size, tile_size), 1)
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -71,10 +77,10 @@ while True:
             sys.exit()
         elif event.type == pygame.VIDEORESIZE:
             screen_info.resize(event.w, event.h)
-            screen = pygame.display.set_mode((screen_info.width, screen_info.height), pygame.RESIZABLE)
             check_tile_size()
 
-    screen.fill((0, 0, 0))
+    screen_info.screen.fill((0, 0, 0))
     draw_grid()
     pygame.display.flip()
     pygame.time.Clock().tick(screen_info.get_fps())
+"""
