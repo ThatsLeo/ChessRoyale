@@ -97,7 +97,8 @@ class Menu(pygame.sprite.Sprite):
                 n_columns = int(n_columns) + 1
 
             total_columns_width = (option_size[0] * n_columns) + (paddingX * (n_columns - 1))
-            
+            total_options_height = (option_size[1] * options_per_column) + (paddingY * (options_per_column - 1))
+
             while total_columns_width > self.box_size[0]:
                 if paddingX <= 10: break
                 paddingX -= 1
@@ -105,8 +106,7 @@ class Menu(pygame.sprite.Sprite):
 
             
             xPos = self.x + (self.box_size[0] - total_columns_width) / 2
-            
-            yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * options_per_column - paddingY
+            yPos = self.y + (self.box_size[1] - total_options_height) / 2
 
             counter = 0
             for option in self.options:
@@ -125,7 +125,7 @@ class Menu(pygame.sprite.Sprite):
                 if counter >= options_per_column: 
                     counter = 0
                     xPos += option_size[0] + paddingX
-                    yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * options_per_column - paddingY
+                    yPos = self.y + (self.box_size[1] - total_options_height) / 2
 
     # Gestione dei keypress da tastiera, solo se il menu è attivo(non ancora gestisce il mouse)
     def handle_event(self, event):
@@ -177,7 +177,7 @@ class Menu(pygame.sprite.Sprite):
 
 # Inizializzazione
 menu = Menu(finestra.screen, 400, 300, 3, color=(200, 200, 200))
-menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8", "Opzione 9", "Opzione 10", "Opzione 11", "Opzione 12"])
+menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8"])
 running_point = RunningPoint(schermox, schermoy, 0.01)
 clock = pygame.time.Clock()
 
