@@ -1,5 +1,6 @@
 import pygame
 from game_settings import tile_size
+from movement_holder import add_move
 
 class Personaggio(pygame.sprite.Sprite):
     def __init__(self, start_cell, team):
@@ -54,19 +55,20 @@ class Personaggio(pygame.sprite.Sprite):
 
         return self.possibili_mosse
     def find_path(self, tile):
-        path=[tile]
+        self.path=[tile]
         cur_tile = tile
         while self.parent[cur_tile]:
-            path.append(self.parent[cur_tile])
+            self.path.append(self.parent[cur_tile])
             cur_tile=self.parent[cur_tile]
-        path.append(self.cur_cell) #aggiungo un elemento finale che rappresenta l'inizio della freccia
-        return path
+        self.path.append(self.cur_cell) #aggiungo un elemento finale che rappresenta l'inizio della freccia
+        return self.path
 
     def move(self, tile):
+        add_move(self, reversed(self.path[:-2]), moving_time=0.5) #alto moving time = più lento
         self.pos = tile.pos
         self.cur_cell.entities = None
         self.cur_cell.walkable = True
         tile.entities = self
         tile.walkable = False
         self.cur_cell = tile
-        self.rect.x, self.rect.y = self.pos
+        
