@@ -14,7 +14,7 @@ class Personaggio(pygame.sprite.Sprite):
         if self.team==1:
             self.image=pygame.transform.rotate(self.image, 180)
     def update(self):
-        self.pos = self.cur_cell.pos
+        self.pos = self.cur_cell.rect.topleft
         self.rect = self.image.get_rect(topleft = self.pos)
     def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
         self.possibili_mosse = []

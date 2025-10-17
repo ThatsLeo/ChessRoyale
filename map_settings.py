@@ -2,6 +2,7 @@ import pygame
 from personaggi import Personaggio
 from game_settings import tile_size, schermox, schermoy
 from random import choices
+from movement_holder import add_move, moving_objects
 grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
 mount_img = pygame.transform.scale(pygame.image.load('background_assets/montagna.png'), (tile_size, tile_size))
 
@@ -32,14 +33,13 @@ class Cella(pygame.sprite.Sprite):
                 self.walkable = False
         self.rect = self.image.get_rect(topleft = pos)
     def shift(self, shift): #shift 1 se scende, -1 se sale
-        self.pos = (self.pos[0],self.pos[1]+shift*tile_size)
-        self.x,self.y = self.x, self.y+shift
-        self.rect = self.image.get_rect(topleft = self.pos)
+        add_move(self,[(self.pos[0],self.pos[1]+shift*tile_size)])
+        self.pos=(self.pos[0],self.pos[1]+tile_size*shift)
+        self.y=self.y+1*shift
 
 
 
 matrix=[] #matrice con tutte le tiles trasformate in classe Cella
-#tiles = pygame.sprite.Group()
 nani = pygame.sprite.Group()
 
 for n_riga, riga in enumerate(map): #per ogni riga
@@ -70,7 +70,7 @@ for n_riga, riga in enumerate(map): #per ogni riga
 class Map:
     def __init__(self):
         self.matrix = matrix
-        self.tiles = pygame.sprite.Group([x for xs in matrix for x in xs])
+        self.tiles = pygame.sprite.LayeredUpdates([x for xs in matrix for x in xs])
     def generate_tile(self): #funzione che spawna una tile in modo random (pesata)
         tile_grounds = ['grass', 'mount']
         weights = [7, 1]
@@ -79,34 +79,33 @@ class Map:
         new_row=[]
         half = int(len(self.matrix)/2)
         if turn == 0: #ha appena giocato il giocatore sotto
-            for cell in self.matrix[int(len(self.matrix)/2)]:
+            for cell in self.matrix[half-1]:
                 new_row.append(Cella(cell.pos, (cell.x, cell.y), self.generate_tile())) #creo nuove celle nella nuova row usando la funzione random
-            self.tiles.remove(self.matrix[-1])
-            self.tiles.add(new_row)
             new_matrix = self.matrix[:half]
             new_matrix.append(new_row)
-            m = self.matrix[half:-1]
+            m = self.matrix[half:] # m è la parte di matrice che deve muoversi
+            m.append(new_row)
             for row in m:
                 for tile in row:
                     tile.shift(1)
-            new_matrix.extend(m)
+            new_matrix.extend(self.matrix[half:-1])
         else:
-            for cell in self.matrix[int(len(self.matrix)/2)-1]:
+            for cell in self.matrix[half]:
                 new_row.append(Cella(cell.pos, (cell.x, cell.y), self.generate_tile())) #creo nuove celle nella nuova row usando la funzione random
-            self.tiles.remove(self.matrix[0])
-            self.tiles.add(new_row)
-            new_matrix = self.matrix[half:]
-            m = self.matrix[1:half]
-            for row in m:
-                for tile in row: tile.shift(-1)
+            new_matrix2 = self.matrix[half:]
+            m = self.matrix[:half]
             m.append(new_row)
-            m.extend(new_matrix)
-            new_matrix = m
+            for row in m:
+                for tile in row:
+                    tile.shift(-1)
+            new_matrix = self.matrix[1:half]
+            new_matrix.append(new_row)
+            new_matrix.extend(new_matrix2)
+        self.tiles.add(new_row, layer= self.tiles.get_bottom_layer()-1)
         self.matrix = new_matrix
         for n in nani:
             if n.cur_cell not in self.tiles:
-                nani.remove(n)
-            n.update()
+                n.kill()
 map=Map()
 
 

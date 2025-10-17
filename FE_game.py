@@ -27,7 +27,9 @@ while True:
             cella_attuale=tile #individuiamo quale cella stiamo guardando
     map.tiles.draw(screen)
     nani.draw(screen)
-    screen.blit(cursore,cella_attuale.pos) #per disegnare le cose opache usiamo blit
+    nani.update()
+    if not moving_objects:
+        screen.blit(cursore,cella_attuale.pos) #per disegnare le cose opache usiamo blit
     screen.blit(zona_nemica,(0,0))
 
     if not moving_objects and fine_turno: #check per la fine del turno
