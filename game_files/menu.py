@@ -71,6 +71,10 @@ class Menu(pygame.sprite.Sprite):
     # Disegna il menu con le relative opzioni con un paddding centrato verticalmente nel box
     def draw(self):
         if self.active:
+
+            pygame.font.init() 
+            my_font = pygame.font.SysFont('Arial MS', 30)
+            
             pygame.draw.rect(self.screen, self.color, self.rect, self.borderWidth) 
             
             option_size = [None, None]
@@ -93,14 +97,23 @@ class Menu(pygame.sprite.Sprite):
                 n_columns = int(n_columns) + 1
 
             total_columns_width = (option_size[0] * n_columns) + (paddingX * (n_columns - 1))
+            
+            while total_columns_width > self.box_size[0]:
+                if paddingX <= 10: break
+                paddingX -= 1
+                total_columns_width = (option_size[0] * n_columns) + (paddingX * (n_columns - 1))
+
+            
             xPos = self.x + (self.box_size[0] - total_columns_width) / 2
             
             yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * options_per_column - paddingY
 
-            pygame.draw.rect(self.screen, self.color,(self.x + self.box_size[0]/2 - 4, self.y, 8, self.box_size[1]))
-
-            counter = 0     
+            counter = 0
             for option in self.options:
+                text_surface = my_font.render(option, False, (255, 0, 0))
+                text_rect = text_surface.get_rect(center=(xPos + option_size[0] / 2, yPos + option_size[1] / 2))
+                self.screen.blit(text_surface, text_rect)
+
                 if option == self.highlighted_option:
                     pygame.draw.rect(self.screen, (255, 0, 0), (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
                 else:
@@ -159,13 +172,12 @@ class Menu(pygame.sprite.Sprite):
             
 
     def set_options(self,lista: list[str] ):
-        for opzione in lista:
-            self.options.append(opzione)
+        self.options = lista
 
 
 # Inizializzazione
 menu = Menu(finestra.screen, 400, 300, 3, color=(200, 200, 200))
-menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro"])
+menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8", "Opzione 9", "Opzione 10", "Opzione 11", "Opzione 12"])
 running_point = RunningPoint(schermox, schermoy, 0.01)
 clock = pygame.time.Clock()
 
