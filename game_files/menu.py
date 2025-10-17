@@ -32,12 +32,13 @@ class Menu(pygame.sprite.Sprite):
     def __init__(self, screen: pygame.display, width: int, height: int, borderWidth: int, color=(int, int, int)):
         super().__init__()
 
-        self.highlighted_option = 0
-        self.selected_option = -1
+        self.options = [" "]
+        self.highlighted_option = self.options[0]
+        self.selected_option = 0
 
         self.box_size = [width, height]
         self.screen = screen
-        self.options = []
+        
         self.screenWidth, self.screenHeight = screen.get_size()
         self.ratio = width / height
         self.original_size = (width, height)
@@ -72,20 +73,46 @@ class Menu(pygame.sprite.Sprite):
         if self.active:
             pygame.draw.rect(self.screen, self.color, self.rect, self.borderWidth) 
             
-            option_size = [None, None] 
+            option_size = [None, None]
             
             option_size[0] = int(self.box_size[0] / 3)
             option_size[1] = int(self.box_size[1] / 6)
-            paddingY = self.screenHeight * 0.02
 
-            xPos = self.x + (self.box_size[0] / 2) - (option_size[0] / 2)
-            yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * len(self.options) - paddingY
-            for option in range(len(self.options)):
+            paddingY = self.screenHeight * 0.02
+            paddingX = self.screenWidth * 0.04
+
+            max_options_in_column = int((self.box_size[1] - paddingY) / (option_size[1] + paddingY))
+            max_options_in_column = max(1, max_options_in_column) 
+            n_columns = (len(self.options) + max_options_in_column - 1) // max_options_in_column
+            
+            options_per_column = len(self.options) / n_columns
+            if options_per_column > int(options_per_column): options_per_column = int(options_per_column) + 1 
+            else: options_per_column = int(options_per_column)
+
+            if n_columns > int(n_columns):
+                n_columns = int(n_columns) + 1
+
+            total_columns_width = (option_size[0] * n_columns) + (paddingX * (n_columns - 1))
+            xPos = self.x + (self.box_size[0] - total_columns_width) / 2
+            
+            yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * options_per_column - paddingY
+
+            pygame.draw.rect(self.screen, self.color,(self.x + self.box_size[0]/2 - 4, self.y, 8, self.box_size[1]))
+
+            counter = 0     
+            for option in self.options:
                 if option == self.highlighted_option:
                     pygame.draw.rect(self.screen, (255, 0, 0), (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
                 else:
                     pygame.draw.rect(self.screen, self.color, (xPos, yPos, option_size[0], option_size[1]), self.borderWidth)
                 yPos += option_size[1] + paddingY
+                    
+                counter += 1
+                    
+                if counter >= options_per_column: 
+                    counter = 0
+                    xPos += option_size[0] + paddingX
+                    yPos = self.y + (self.box_size[1] / 2) - (option_size[1] / 2) * options_per_column - paddingY
 
     # Gestione dei keypress da tastiera, solo se il menu è attivo(non ancora gestisce il mouse)
     def handle_event(self, event):
@@ -95,18 +122,27 @@ class Menu(pygame.sprite.Sprite):
                     self.deactivate()
                 else:
                     self.activate()
+            
             case pygame.K_UP:
                 if self.window_state():
-                    self.highlighted_option -= 1
+                    self.selected_option -= 1
+            
             case pygame.K_DOWN:
                 if self.window_state():
-                    self.highlighted_option += 1
+                    self.selected_option += 1
+                          
             case _:
                 pass
-        if self.highlighted_option < 0: 
-            self.highlighted_option = len(self.options) - 1
-        elif self.highlighted_option >= len(self.options): 
-            self.highlighted_option = 0
+        
+        if self.selected_option < 0:
+            self.selected_option = len(self.options) - 1 
+            self.highlighted_option = self.options[len(self.options) - 1]
+        
+        elif self.selected_option >= len(self.options): 
+            self.selected_option = 0
+            self.highlighted_option = self.options[0]
+        else:
+            self.highlighted_option = self.options[self.selected_option]
 
     # Resize del menu in base alla nuova dimensione della finestra
     def resize(self):
@@ -129,7 +165,7 @@ class Menu(pygame.sprite.Sprite):
 
 # Inizializzazione
 menu = Menu(finestra.screen, 400, 300, 3, color=(200, 200, 200))
-menu.set_options(["Start Game", "Options", "Exit"])
+menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro"])
 running_point = RunningPoint(schermox, schermoy, 0.01)
 clock = pygame.time.Clock()
 
