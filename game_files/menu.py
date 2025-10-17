@@ -1,8 +1,10 @@
+import enum
 import window_handler
 import pygame, sys
 import time
 
 pygame.init()
+
 
 fps = 60
 schermox, schermoy = 1280,720
@@ -28,14 +30,27 @@ class RunningPoint:
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, self.xpos, self.ypos))
 
+class Position():
+    CENTER = 0
+    TOP = 1
+    BOTTOM = 2
+    class Padding():
+        CENTER = 0
+        LEFT = 1
+        RIGHT = 2
+
+
 class Menu(pygame.sprite.Sprite):
-    def __init__(self, screen: pygame.display, width: int, height: int, borderWidth: int, color=(int, int, int)):
+    def __init__(self, screen: pygame.display, width: int, height: int, borderWidth: int,
+                  position: Position = Position.CENTER, padding: Position.Padding = Position.Padding.CENTER, color=(int, int, int)):
         super().__init__()
 
         self.options = [" "]
         self.highlighted_option = self.options[0]
         self.selected_option = 0
         self.options_per_col = None
+        self.position = position
+        self.padding = padding
 
         self.box_size = [width, height]
         self.screen = screen
@@ -53,13 +68,28 @@ class Menu(pygame.sprite.Sprite):
         if height > self.screenHeight or width > self.screenWidth:
             raise ValueError("Menu dimensions exceed screen dimensions")
         
-        self.x = (self.screenWidth - width) // 2
-        self.y = (self.screenHeight - height) // 2
+        self.update_position()
 
         self.rect = pygame.Rect(self.x, self.y, width, height)
         self.borderWidth = borderWidth
         self.active = False
-    
+
+    def update_position(self):
+        match self.position:
+            case Position.CENTER:
+                self.y = (self.screenHeight - self.box_size[1]) // 2
+            case Position.TOP:
+                self.y = self.screenHeight - (self.screenHeight * 99/100) 
+            case Position.BOTTOM:
+                self.y = self.screenHeight - (self.screenHeight * 1/100) - self.box_size[1]
+        match self.padding:
+            case Position.Padding.CENTER:
+                self.x = (self.screenWidth - self.box_size[0]) // 2
+            case Position.Padding.LEFT:
+                self.x = self.screenWidth * 0.01
+            case Position.Padding.RIGHT:
+                self.x = self.screenWidth - (self.screenWidth * 0.01) - self.box_size[0] 
+
     def window_state(self):
         return self.active
     
@@ -173,8 +203,8 @@ class Menu(pygame.sprite.Sprite):
             self.box_size[1] = (self.box_size[0] * self.original_size[1]) // self.original_size[0]
 
         self.screenWidth, self.screenHeight = new_width, new_height
-        self.x = (self.screenWidth - self.box_size[0]) // 2
-        self.y = (self.screenHeight - self.box_size[1]) // 2
+        
+        self.update_position()
         self.rect = pygame.Rect(self.x, self.y, self.box_size[0], self.box_size[1])
         
             
@@ -184,7 +214,7 @@ class Menu(pygame.sprite.Sprite):
 
 
 # Inizializzazione
-menu = Menu(finestra.screen, 400, 300, 3, color=(200, 200, 200))
+menu = Menu(finestra.screen, 400, 300, 3, Position.BOTTOM, Position.Padding.RIGHT, color=(200, 200, 200))
 menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8"])
 running_point = RunningPoint(schermox, schermoy, 0.01)
 clock = pygame.time.Clock()
