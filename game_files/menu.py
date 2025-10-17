@@ -35,6 +35,7 @@ class Menu(pygame.sprite.Sprite):
         self.options = [" "]
         self.highlighted_option = self.options[0]
         self.selected_option = 0
+        self.options_per_col = None
 
         self.box_size = [width, height]
         self.screen = screen
@@ -59,14 +60,11 @@ class Menu(pygame.sprite.Sprite):
         self.borderWidth = borderWidth
         self.active = False
     
-    def activate(self):
-        self.active = True
-
-    def deactivate(self):
-        self.active = False
-    
     def window_state(self):
         return self.active
+    
+    def toggle(self):
+        self.active = not self.active
 
     # Disegna il menu con le relative opzioni con un paddding centrato verticalmente nel box
     def draw(self):
@@ -92,6 +90,8 @@ class Menu(pygame.sprite.Sprite):
             options_per_column = len(self.options) / n_columns
             if options_per_column > int(options_per_column): options_per_column = int(options_per_column) + 1 
             else: options_per_column = int(options_per_column)
+
+            self.options_per_col = options_per_column
 
             if n_columns > int(n_columns):
                 n_columns = int(n_columns) + 1
@@ -129,23 +129,31 @@ class Menu(pygame.sprite.Sprite):
 
     # Gestione dei keypress da tastiera, solo se il menu è attivo(non ancora gestisce il mouse)
     def handle_event(self, event):
-        match event.key:
-            case pygame.K_SPACE:
-                if self.window_state():
-                    self.deactivate()
-                else:
-                    self.activate()
+        
+        if event.key == pygame.K_SPACE:
+            self.toggle()
+
+        if self.window_state():
             
-            case pygame.K_UP:
-                if self.window_state():
+            match event.key:
+                case pygame.K_UP:
                     self.selected_option -= 1
-            
-            case pygame.K_DOWN:
-                if self.window_state():
+                
+                case pygame.K_DOWN:
                     self.selected_option += 1
-                          
-            case _:
-                pass
+                
+                case pygame.K_LEFT:
+                    self.selected_option -= self.options_per_col
+                    if self.selected_option < 0:
+                        self.selected_option += self.options_per_col * 2 
+                
+                case pygame.K_RIGHT:
+                    self.selected_option += self.options_per_col
+                    if self.selected_option >= len(self.options):
+                        self.selected_option -= self.options_per_col * 2
+
+                case _:
+                    pass
         
         if self.selected_option < 0:
             self.selected_option = len(self.options) - 1 
