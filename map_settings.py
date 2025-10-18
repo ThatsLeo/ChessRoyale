@@ -2,7 +2,7 @@ import pygame
 from personaggi import Personaggio
 from game_settings import tile_size, schermox, schermoy
 from random import choices
-from movement_holder import add_move, moving_objects
+from movement_holder import add_move, add_shake
 grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
 mount_img = pygame.transform.scale(pygame.image.load('background_assets/montagna.png'), (tile_size, tile_size))
 
@@ -62,8 +62,6 @@ for n_riga, riga in enumerate(map): #per ogni riga
             nani.add(nano)
             cell.entities= nano
             cell.walkable = False
-        if tile=='M':
-            cell.image = mount_img
     matrix.append(matrix_row)
 
 
@@ -71,6 +69,10 @@ class Map:
     def __init__(self):
         self.matrix = matrix
         self.tiles = pygame.sprite.LayeredUpdates([x for xs in matrix for x in xs])
+        for row in range(len(self.matrix)):
+            x= self.matrix[row][0].pos[0]-tile_size
+            y=row*tile_size
+            #self.tiles.add(Cella((x,y), (n_colonna, n_riga), 'grass'))
     def generate_tile(self): #funzione che spawna una tile in modo random (pesata)
         tile_grounds = ['grass', 'mount']
         weights = [7, 1]
@@ -103,6 +105,7 @@ class Map:
             new_matrix.extend(new_matrix2)
         self.tiles.add(new_row, layer= self.tiles.get_bottom_layer()-1)
         self.matrix = new_matrix
+        add_shake(self.tiles, 30, 2)
         for n in nani:
             if n.cur_cell not in self.tiles:
                 n.kill()
