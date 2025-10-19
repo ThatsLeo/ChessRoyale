@@ -32,6 +32,8 @@ def add_shake(tiles, intensity, duration):
 
 t=fps/1000
 def check_movement():
+    if not moving_objects and not shaking_objects:
+        return False
     if moving_objects: 
         for tile in moving_objects.copy():
             obj = tile
@@ -69,3 +71,4 @@ def check_movement():
                     shaking_objects.pop(obj)
             else:
                 tile['obj'].rect.x=tile['default']+tile['offsets'][0]*time_ratio
+    return True

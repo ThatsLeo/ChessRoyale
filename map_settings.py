@@ -27,9 +27,11 @@ class Cella(pygame.sprite.Sprite):
         self.flagged= False #Bool per controllare se la casella selezionate è questa
         self.walkable = True #Bool per verificare se si può camminare qui
         match ground:
-            case 'grass': self.image = grass_img
+            case 'grass':
+                self.image = grass_img.copy()
             case 'mount':
-                self.image = mount_img
+                self.image = grass_img.copy()
+                self.image.blit(mount_img,(0,0))
                 self.walkable = False
         self.rect = self.image.get_rect(topleft = pos)
     def shift(self, shift): #shift 1 se scende, -1 se sale
@@ -69,10 +71,6 @@ class Map:
     def __init__(self):
         self.matrix = matrix
         self.tiles = pygame.sprite.LayeredUpdates([x for xs in matrix for x in xs])
-        for row in range(len(self.matrix)):
-            x= self.matrix[row][0].pos[0]-tile_size
-            y=row*tile_size
-            #self.tiles.add(Cella((x,y), (n_colonna, n_riga), 'grass'))
     def generate_tile(self): #funzione che spawna una tile in modo random (pesata)
         tile_grounds = ['grass', 'mount']
         weights = [7, 1]
@@ -118,7 +116,7 @@ cursore=pygame.Surface((tile_size,tile_size)) #quadratino grigio trasparente
 cursore.fill("#585858")
 cursore.set_alpha(150)
 
-zona_nemica=pygame.Surface((schermox,schermoy/2)) #zona rossa trasparente
+zona_nemica=pygame.Surface((schermox,len(matrix)/2*tile_size)) #zona rossa trasparente
 zona_nemica.fill("#E20E0E")
 zona_nemica.set_alpha(50)
 
@@ -126,3 +124,5 @@ tile_opaca = pygame.Surface((tile_size,tile_size))
 tile_opaca.fill("#3E0FE6")
 tile_opaca.set_alpha(100)
 
+info_section = pygame.Surface((schermox,tile_size*2))
+info_section.fill("#1F1152")
