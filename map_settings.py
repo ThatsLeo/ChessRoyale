@@ -1,6 +1,6 @@
 import pygame
 from personaggi import Personaggio
-from game_settings import tile_size, schermox, schermoy
+from game_settings import *
 from random import choices
 from movement_holder import add_move, add_shake
 grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
@@ -123,6 +123,3 @@ zona_nemica.set_alpha(50)
 tile_opaca = pygame.Surface((tile_size,tile_size))
 tile_opaca.fill("#3E0FE6")
 tile_opaca.set_alpha(100)
-
-info_section = pygame.Surface((schermox,tile_size*2))
-info_section.fill("#1F1152")

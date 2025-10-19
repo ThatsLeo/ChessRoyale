@@ -3,6 +3,7 @@ from arrow_settings import arrowing
 from map_settings import *
 from game_settings import *
 from movement_holder import check_movement, moving_objects
+from info_menu import *
 fpsclock=pygame.time.Clock()
 
 pygame.init()
@@ -19,7 +20,7 @@ while True:
     screen.blit(game_field, (0,0))
     key_input=pygame.key.get_pressed()
     mouse=pygame.mouse.get_pos() #posizione mouse
-    if not game_field.get_rect(topleft= (0,0)).collidepoint(mouse): cella_attuale=None #se il cursore è fuori dal campodi gioco, non viene calcolato
+    if not game_field.get_rect(topleft= (0,0)).collidepoint(mouse): cella_attuale=None #se il cursore è fuori dal campodi gioco, non viene calcolato  
     else:
         for tile in map.tiles:
             if tile.rect.collidepoint(mouse):
