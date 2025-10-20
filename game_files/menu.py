@@ -1,4 +1,3 @@
-import enum
 import window_handler
 import pygame, sys
 import time
@@ -31,13 +30,24 @@ class RunningPoint:
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, self.xpos, self.ypos))
 
 class Position():
-    CENTER = 0
-    TOP = 1
-    BOTTOM = 2
+    CENTER = -1
+    TOP = -2
+    BOTTOM = -3
+
+    @staticmethod
+    def CUSTOM(value):
+        return ["CUSTOM", value]
+    
     class Padding():
-        CENTER = 0
-        LEFT = 1
-        RIGHT = 2
+        CENTER = -1
+        LEFT = -2
+        RIGHT = -3
+
+        @staticmethod
+        def CUSTOM(value):
+            return ["CUSTOM", value]
+
+
 
 
 class Menu(pygame.sprite.Sprite):
@@ -67,7 +77,7 @@ class Menu(pygame.sprite.Sprite):
         
         if height > self.screenHeight or width > self.screenWidth:
             raise ValueError("Menu dimensions exceed screen dimensions")
-        
+        self.convert_to_percentage()
         self.update_position()
 
         self.rect = pygame.Rect(self.x, self.y, width, height)
@@ -75,20 +85,32 @@ class Menu(pygame.sprite.Sprite):
         self.active = False
 
     def update_position(self):
-        match self.position:
-            case Position.CENTER:
-                self.y = (self.screenHeight - self.box_size[1]) // 2
-            case Position.TOP:
-                self.y = self.screenHeight - (self.screenHeight * 99/100) 
-            case Position.BOTTOM:
-                self.y = self.screenHeight - (self.screenHeight * 1/100) - self.box_size[1]
-        match self.padding:
-            case Position.Padding.CENTER:
-                self.x = (self.screenWidth - self.box_size[0]) // 2
-            case Position.Padding.LEFT:
-                self.x = self.screenWidth * 0.01
-            case Position.Padding.RIGHT:
-                self.x = self.screenWidth - (self.screenWidth * 0.01) - self.box_size[0] 
+        if isinstance(self.position, list) and self.position[0] == "CUSTOM":
+            self.y = self.position[1] /100 * self.screenHeight
+
+        else:
+            match self.position:
+                case Position.CENTER:
+                    self.y = (self.screenHeight - self.box_size[1]) // 2
+                case Position.TOP:
+                    self.y = self.screenHeight - (self.screenHeight * 99/100) 
+                case Position.BOTTOM:
+                    self.y = self.screenHeight - (self.screenHeight * 1/100) - self.box_size[1]
+        
+
+        if isinstance(self.padding, list) and self.padding[0] == "CUSTOM":
+            self.x = self.padding[1] / 100 * self.screenWidth
+
+        else:
+            match self.padding:
+                case Position.Padding.CENTER:
+                    self.x = (self.screenWidth - self.box_size[0]) // 2
+                case Position.Padding.LEFT:
+                    self.x = self.screenWidth * 0.01
+                case Position.Padding.RIGHT:
+                    self.x = self.screenWidth - (self.screenWidth * 0.01) - self.box_size[0]
+
+        self.rect = pygame.Rect(self.x, self.y, self.box_size[0], self.box_size[1])            
 
     def window_state(self):
         return self.active
@@ -205,25 +227,43 @@ class Menu(pygame.sprite.Sprite):
         self.screenWidth, self.screenHeight = new_width, new_height
         
         self.update_position()
-        self.rect = pygame.Rect(self.x, self.y, self.box_size[0], self.box_size[1])
         
-            
-
+        
     def set_options(self,lista: list[str] ):
         self.options = lista
 
 
+    def convert_to_percentage(self):
+    
+        if isinstance(self.position, list) and self.position[0] == "CUSTOM":
+            y_percent = (self.position[1] / self.screenHeight) * 100
+            self.position = ["CUSTOM", y_percent]
+
+        if isinstance(self.padding, list) and self.padding[0] == "CUSTOM":
+            x_percent = (self.padding[1] / self.screenWidth) * 100
+            self.padding = ["CUSTOM", x_percent]
+
+    def update_custom_position(self, x, y):
+        self.position = ["CUSTOM", y]
+        self.padding = ["CUSTOM", x]
+
+        self.convert_to_percentage()
+        self.update_position()
+
+
+
 # Inizializzazione
-menu = Menu(finestra.screen, 400, 300, 3, Position.BOTTOM, Position.Padding.RIGHT, color=(200, 200, 200))
+menu = Menu(finestra.screen, 400, 300, 3, Position.CUSTOM(0), Position.Padding.CUSTOM(0), color=(200, 200, 200))
 menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8"])
-running_point = RunningPoint(schermox, schermoy, 0.01)
+running_point = RunningPoint(schermox, schermoy, 0.001)
 clock = pygame.time.Clock()
 
 last_update_time = time.time()
 last_running_point_update = time.time()
-
+counter = 0
 # Game loop principale
 while True:
+    menu.update_custom_position(counter, counter)
     current_time = time.time()
     
     # Gestione eventi
@@ -256,6 +296,8 @@ while True:
         # Disegna tutto
         running_point.draw(finestra.screen)
         menu.draw()
+        counter += 1
         
         # Mostra le modifiche
         pygame.display.flip()
+    
