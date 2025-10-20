@@ -9,6 +9,8 @@ class Personaggio(pygame.sprite.Sprite):
         self.cur_cell = start_cell #relativa cella in cui è dentro
         self.image = pygame.image.load('background_assets/nanodimerda.png')
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
+        self.name = 'Nano di Merda'
+        self.desc = 'è proprio un nao di merda!'
         self.rect = self.image.get_rect(topleft = self.pos)
         self.team = team
         if self.team==1:

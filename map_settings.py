@@ -3,7 +3,7 @@ from personaggi import Personaggio
 from game_settings import *
 from random import choices
 from movement_holder import add_move, add_shake
-grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
+grass_img = pygame.transform.scale(pygame.image.load('background_assets/prato_fede2.png'), (tile_size, tile_size))
 mount_img = pygame.transform.scale(pygame.image.load('background_assets/montagna.png'), (tile_size, tile_size))
 
 map=[
@@ -26,11 +26,16 @@ class Cella(pygame.sprite.Sprite):
         self.entities = None #se si trova un personaggio sopra quella casella
         self.flagged= False #Bool per controllare se la casella selezionate è questa
         self.walkable = True #Bool per verificare se si può camminare qui
+        self.gorund = ground
         match ground:
             case 'grass':
                 self.image = grass_img.copy()
+                self.name = 'Prato'
+                self.desc = 'più vuoto della mia anima!'
             case 'mount':
                 self.image = grass_img.copy()
+                self.name = 'Montagna'
+                self.desc = 'dura come il'
                 self.image.blit(mount_img,(0,0))
                 self.walkable = False
         self.rect = self.image.get_rect(topleft = pos)

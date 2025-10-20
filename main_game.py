@@ -20,13 +20,12 @@ while True:
     screen.blit(game_field, (0,0))
     key_input=pygame.key.get_pressed()
     mouse=pygame.mouse.get_pos() #posizione mouse
-    if not game_field.get_rect(topleft= (0,0)).collidepoint(mouse): cella_attuale=None #se il cursore è fuori dal campodi gioco, non viene calcolato  
-    else:
-        for tile in map.tiles:
-            if tile.rect.collidepoint(mouse):
-                if cella_attuale!=tile:
-                    cambio_cella = True
-                cella_attuale=tile #individuiamo quale cella stiamo guardando
+    for tile in map.tiles:
+        if tile.rect.collidepoint(mouse):
+            if cella_attuale!=tile:
+                cambio_cella = True
+            cella_attuale=tile #individuiamo quale cella stiamo guardando
+            info_section.update_info_menu(cella_attuale)
 
     moving = check_movement()
     if not moving_objects and fine_turno: #check per la fine del turno
@@ -40,7 +39,7 @@ while True:
     if not moving and cella_attuale:
         game_field.blit(cursore,cella_attuale.pos)
     game_field.blit(zona_nemica,(0,0))
-    screen.blit(info_section,(0,len(matrix)*tile_size))
+    info_section.draw(screen)
 
     if possibili_mosse:
         for mossa in possibili_mosse: #tiles colorate blu
@@ -74,7 +73,7 @@ while True:
                         # per ora il turno finisce quando muovi una pedina:
                         fine_turno=True
 
-                    elif cella_attuale.entities: #se clicchi su una cella che ha un personaggio
+                    elif cella_attuale.entities and game_field.get_rect(topleft= (0,0)).collidepoint(mouse): #se clicchi su una cella che ha un personaggio
                         if turno == cella_attuale.entities.team: # puoi cliccare solo le pedine della squadra a cui tocca
                             possibili_mosse=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
                             cella_attuale.flagged = True
