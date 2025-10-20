@@ -77,7 +77,6 @@ class Menu(pygame.sprite.Sprite):
         
         if height > self.screenHeight or width > self.screenWidth:
             raise ValueError("Menu dimensions exceed screen dimensions")
-        self.convert_to_percentage()
         self.update_position()
 
         self.rect = pygame.Rect(self.x, self.y, width, height)
@@ -85,8 +84,9 @@ class Menu(pygame.sprite.Sprite):
         self.active = False
 
     def update_position(self):
+
         if isinstance(self.position, list) and self.position[0] == "CUSTOM":
-            self.y = self.position[1] /100 * self.screenHeight
+            self.y = self.position[1]
 
         else:
             match self.position:
@@ -99,7 +99,7 @@ class Menu(pygame.sprite.Sprite):
         
 
         if isinstance(self.padding, list) and self.padding[0] == "CUSTOM":
-            self.x = self.padding[1] / 100 * self.screenWidth
+            self.x = self.padding[1]
 
         else:
             match self.padding:
@@ -225,7 +225,15 @@ class Menu(pygame.sprite.Sprite):
             self.box_size[1] = (self.box_size[0] * self.original_size[1]) // self.original_size[0]
 
         self.screenWidth, self.screenHeight = new_width, new_height
+
+        if isinstance(self.position, list) and self.position[0] == "CUSTOM":
+            y_ratio = self.position[1] / self.screenHeight
+            self.position[1] = int(y_ratio * new_height)
         
+        if isinstance(self.padding, list) and self.padding[0] == "CUSTOM":
+            x_ratio = self.padding[1] / self.screenWidth
+            self.padding[1] = int(x_ratio * new_width)
+
         self.update_position()
         
         
@@ -233,24 +241,11 @@ class Menu(pygame.sprite.Sprite):
         self.options = lista
 
 
-    def convert_to_percentage(self):
-    
-        if isinstance(self.position, list) and self.position[0] == "CUSTOM":
-            y_percent = (self.position[1] / self.screenHeight) * 100
-            self.position = ["CUSTOM", y_percent]
-
-        if isinstance(self.padding, list) and self.padding[0] == "CUSTOM":
-            x_percent = (self.padding[1] / self.screenWidth) * 100
-            self.padding = ["CUSTOM", x_percent]
-
     def update_custom_position(self, x, y):
         self.position = ["CUSTOM", y]
         self.padding = ["CUSTOM", x]
 
-        self.convert_to_percentage()
         self.update_position()
-
-
 
 # Inizializzazione
 menu = Menu(finestra.screen, 400, 300, 3, Position.CUSTOM(0), Position.Padding.CUSTOM(0), color=(200, 200, 200))
@@ -260,10 +255,51 @@ clock = pygame.time.Clock()
 
 last_update_time = time.time()
 last_running_point_update = time.time()
-counter = 0
+
+def dvd_effect_colorful(menu_obj, speed=2):
+    import random
+    
+    # Inizializza le variabili globali se non esistono
+    if not hasattr(dvd_effect_colorful, 'direction_x'):
+        dvd_effect_colorful.direction_x = 1
+        dvd_effect_colorful.direction_y = 1
+        dvd_effect_colorful.speed = speed
+        dvd_effect_colorful.colors = [
+            (255, 0, 0),    # Rosso
+            (0, 255, 0),    # Verde
+            (0, 0, 255),    # Blu
+            (255, 255, 0),  # Giallo
+            (255, 0, 255),  # Magenta
+            (0, 255, 255),  # Ciano
+            (255, 128, 0),  # Arancione
+            (128, 0, 255),  # Viola
+        ]
+    
+    current_x = menu_obj.x
+    current_y = menu_obj.y
+    
+    new_x = current_x + (dvd_effect_colorful.direction_x * dvd_effect_colorful.speed)
+    new_y = current_y + (dvd_effect_colorful.direction_y * dvd_effect_colorful.speed)
+    
+    bounced = False
+    
+    if new_x + menu_obj.box_size[0] >= menu_obj.screenWidth or new_x <= 0:
+        dvd_effect_colorful.direction_x *= -1
+        new_x = current_x + (dvd_effect_colorful.direction_x * dvd_effect_colorful.speed)
+        bounced = True
+    
+    if new_y + menu_obj.box_size[1] >= menu_obj.screenHeight or new_y <= 0:
+        dvd_effect_colorful.direction_y *= -1
+        new_y = current_y + (dvd_effect_colorful.direction_y * dvd_effect_colorful.speed)
+        bounced = True
+    
+    if bounced:
+        menu_obj.color = random.choice(dvd_effect_colorful.colors)
+    
+    menu_obj.update_custom_position(new_x, new_y)
+
 # Game loop principale
 while True:
-    menu.update_custom_position(counter, counter)
     current_time = time.time()
     
     # Gestione eventi
@@ -296,7 +332,7 @@ while True:
         # Disegna tutto
         running_point.draw(finestra.screen)
         menu.draw()
-        counter += 1
+        dvd_effect_colorful(menu, speed=2)
         
         # Mostra le modifiche
         pygame.display.flip()
