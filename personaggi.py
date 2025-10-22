@@ -10,7 +10,8 @@ class Personaggio(pygame.sprite.Sprite):
         self.image = pygame.image.load('background_assets/nanodimerda.png')
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.name = 'Nano di Merda'
-        self.desc = 'è proprio un nao di merda!'
+        self.desc = 'è proprio un nano di merda!'
+        self.range = 2 #range di attacco
         self.rect = self.image.get_rect(topleft = self.pos)
         self.team = team
         if self.team==1:
@@ -19,8 +20,10 @@ class Personaggio(pygame.sprite.Sprite):
         self.pos = self.cur_cell.rect.topleft
         self.rect = self.image.get_rect(topleft = self.pos)
     def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
+        max_dist-=1 #levo 1 pk sennò ne conta una in più...
         self.possibili_mosse = []
         self.mosse_totali = []
+        self.possibili_attacchi = set()
         self.parent = {} #questo servirà per costruire la freccia
 
         start = self.cur_cell
@@ -43,19 +46,21 @@ class Personaggio(pygame.sprite.Sprite):
                 ny = y + dy
                 nx = x + dx
 
-                effective_dist = abs(nx - start.x) + abs(ny - start.y)
+                #effective_dist = abs(nx - start.x) + abs(ny - start.y) 
                 if 0 <= ny < rows and 0 <= nx < cols: # controlla che la cella sia dentro la mappa/matrice
                     cell = matrix[ny][nx]
                     if cell not in visited and (cell.walkable or getattr(cell.entities, "team", None)==self.team) and (cell_ in self.mosse_totali or cell_==start): # controlla che la cella sia "valida"
                         visited.add(cell)
                         queue.append((matrix[ny][nx], dist + 1))
                         self.parent[matrix[ny][nx]] = cell_
-                        if effective_dist <= max_dist:
+                        if dist <= max_dist:
                             if getattr(cell.entities, "team", None)!=self.team:
                                 self.possibili_mosse.append(cell)
                             self.mosse_totali.append(cell) # mosse totali include le pedine alleate
+                    if (cell_ in self.possibili_mosse or cell_ in self.possibili_attacchi) and (dist <= max_dist+self.range) and (cell_.walkable or cell_ in self.possibili_attacchi):
+                        self.possibili_attacchi.add(cell)
 
-        return self.possibili_mosse
+        return self.possibili_mosse, self.possibili_attacchi
     def find_path(self, tile):
         self.path=[tile]
         cur_tile = tile

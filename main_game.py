@@ -42,8 +42,11 @@ while True:
     info_section.draw(screen)
 
     if possibili_mosse:
-        for mossa in possibili_mosse: #tiles colorate blu
-            game_field.blit(tile_opaca, mossa.pos)
+        for mossa in possibili_attacchi: #tiles colorate blu
+            if mossa in flagged_cell.entities.possibili_mosse:
+                game_field.blit(tile_opaca, mossa.pos)
+            else:
+                game_field.blit(tile_attacchi, mossa.pos)
         if cambio_cella and cella_attuale in possibili_mosse: # calcolo la freccia solo quando il cursore si sposta di casella
             path = flagged_cell.entities.find_path(cella_attuale)
             arrows, arrow_path = arrowing(path)
@@ -75,7 +78,7 @@ while True:
 
                     elif cella_attuale.entities and game_field.get_rect(topleft= (0,0)).collidepoint(mouse): #se clicchi su una cella che ha un personaggio
                         if turno == cella_attuale.entities.team: # puoi cliccare solo le pedine della squadra a cui tocca
-                            possibili_mosse=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
+                            possibili_mosse, possibili_attacchi=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
                             cella_attuale.flagged = True
                             flagged_cell= cella_attuale
     pygame.display.update()

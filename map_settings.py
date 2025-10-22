@@ -3,7 +3,7 @@ from personaggi import Personaggio
 from game_settings import *
 from random import choices
 from movement_holder import add_move, add_shake
-grass_img = pygame.transform.scale(pygame.image.load('background_assets/prato_fede2.png'), (tile_size, tile_size))
+grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
 mount_img = pygame.transform.scale(pygame.image.load('background_assets/montagna.png'), (tile_size, tile_size))
 
 map=[
@@ -108,7 +108,7 @@ class Map:
             new_matrix.extend(new_matrix2)
         self.tiles.add(new_row, layer= self.tiles.get_bottom_layer()-1)
         self.matrix = new_matrix
-        add_shake(self.tiles, 30, 2)
+        add_shake(self.tiles, 20, 2)
         for n in nani:
             if n.cur_cell not in self.tiles:
                 n.kill()
@@ -128,3 +128,7 @@ zona_nemica.set_alpha(50)
 tile_opaca = pygame.Surface((tile_size,tile_size))
 tile_opaca.fill("#3E0FE6")
 tile_opaca.set_alpha(100)
+
+tile_attacchi = pygame.Surface((tile_size,tile_size))
+tile_attacchi.fill("#CD0000")
+tile_attacchi.set_alpha(100)

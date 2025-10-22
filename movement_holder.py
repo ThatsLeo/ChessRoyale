@@ -30,7 +30,7 @@ def add_shake(tiles, intensity, duration):
         shaking_objects[str(id(tile))] = {'obj': tile, 'default': tile.pos[0], 'offsets': shake_offsets.copy(), 'time': 0, 'moving_time': moving_time}
 
 
-t=fps/1000
+t=1/fps
 def check_movement():
     if not moving_objects and not shaking_objects:
         return False
@@ -41,7 +41,7 @@ def check_movement():
             tile['time']+=t
 
             time_ratio=tile['time']/tile['moving_time']
-            if time_ratio>1:
+            if time_ratio>1: #ha raggiunto il primo target
                 tile['obj'].rect.x=tile['target'][0][0]
                 tile['obj'].rect.y=tile['target'][0][1]
                 tile['target'].pop(0)
