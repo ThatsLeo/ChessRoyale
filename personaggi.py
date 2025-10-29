@@ -20,7 +20,7 @@ class Personaggio(pygame.sprite.Sprite):
         self.pos = self.cur_cell.rect.topleft
         self.rect = self.image.get_rect(topleft = self.pos)
     def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
-        max_dist-=1 #levo 1 pk sennò ne conta una in più...
+        #max_dist-=1 #levo 1 pk sennò ne conta una in più...
         self.possibili_mosse = []
         self.mosse_totali = []
         self.possibili_attacchi = set()
@@ -32,14 +32,17 @@ class Personaggio(pygame.sprite.Sprite):
         cols = len(matrix[0])
 
         #utilizzo BFS, quindi una coda
-        queue = [(self.cur_cell, 0)]  # inizializzo la coda con il l'elemento di start, per ogni elemento salvo la distanza (qui 0)
-        visited = set([self.cur_cell])
-        self.parent[self.cur_cell] = None 
+        queue = [(start, 0)]  # inizializzo la coda con il l'elemento di start, per ogni elemento salvo la distanza (qui 0)
+        visited = set([start])
+        self.parent[start] = None 
         # direzioni possibili (su, giù, sinistra, destra)
         directions = [(0,1), (0,-1), (1,0), (-1,0)]
 
         while len(queue) > 0: #finchè la coda non è vuota
             cell_, dist = queue.pop(0) #faccio il dequeue
+            if dist >= max_dist:
+                continue
+
             x, y = cell_.x, cell_.y
 
             for dy, dx in directions: #calcolo le celle vicine
@@ -49,16 +52,37 @@ class Personaggio(pygame.sprite.Sprite):
                 #effective_dist = abs(nx - start.x) + abs(ny - start.y) 
                 if 0 <= ny < rows and 0 <= nx < cols: # controlla che la cella sia dentro la mappa/matrice
                     cell = matrix[ny][nx]
-                    if cell not in visited and (cell.walkable or getattr(cell.entities, "team", None)==self.team) and (cell_ in self.mosse_totali or cell_==start): # controlla che la cella sia "valida"
+                    is_ally = getattr(cell.entities, "team", None)==self.team #verifica se una pedina è dello stesso team
+                    if cell not in visited and (cell.walkable or is_ally) and (cell_ in self.mosse_totali or cell_==start): # controlla che la cella sia "valida"
                         visited.add(cell)
                         queue.append((matrix[ny][nx], dist + 1))
                         self.parent[matrix[ny][nx]] = cell_
-                        if dist <= max_dist:
-                            if getattr(cell.entities, "team", None)!=self.team:
-                                self.possibili_mosse.append(cell)
-                            self.mosse_totali.append(cell) # mosse totali include le pedine alleate
-                    if (cell_ in self.possibili_mosse or cell_ in self.possibili_attacchi) and (dist <= max_dist+self.range) and (cell_.walkable or cell_ in self.possibili_attacchi):
+                        if getattr(cell.entities, "team", None)!=self.team:
+                            self.possibili_mosse.append(cell)
+                        self.mosse_totali.append(cell) # mosse totali include le pedine alleate
+
+        #BFS per calcolare gli attacchi
+        queue = [(cell, 0) for cell in (self.possibili_mosse)]
+        visited_attack = set(self.possibili_mosse)
+
+        while len(queue) > 0:
+            cell_, dist = queue.pop(0)
+            if dist >= self.range:
+                continue
+
+            x, y = cell_.x, cell_.y
+
+            for dy, dx in directions:
+                ny = y + dy
+                nx = x + dx
+                if 0 <= ny < rows and 0 <= nx < cols:
+                    cell = matrix[ny][nx]
+                    if cell not in visited_attack:
+                        visited_attack.add(cell)
+                        queue.append((cell, dist + 1))
                         self.possibili_attacchi.add(cell)
+
+        self.possibili_attacchi.update(self.possibili_mosse) #ggiungo le celle di movimento che sono sempre anche di attacco
 
         return self.possibili_mosse, self.possibili_attacchi
     def find_path(self, tile):

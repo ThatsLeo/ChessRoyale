@@ -15,7 +15,7 @@ map=[
     ' MMM    ',
     '        ',
     '   N    ',
-    ' N      ',
+    ' N  NN  ',
     '        ',
 ]
 class Cella(pygame.sprite.Sprite):
