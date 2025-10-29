@@ -9,25 +9,14 @@ fps = 60
 schermox, schermoy = 1280,720
 finestra = window_handler.window(schermox, schermoy, fps)
 
-class RunningPoint:
-    def __init__(self, screen_width, screen_height, time: float):
-        self.xpos = 1
-        self.ypos = 1
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.time = time
 
-    def update(self):
-        """Aggiorna la posizione del punto per un frame"""
-        self.xpos += 1
-        if self.xpos >= self.screen_width:
-            self.xpos = 1
-            self.ypos += 1
-        if self.ypos > self.screen_height:
-            self.ypos = 1
-    
-    def draw(self, screen):
-        pygame.draw.rect(screen, (255, 255, 255), (0, 0, self.xpos, self.ypos))
+class Tasto(pygame.sprite.Sprite):
+    def __init__(self, dim, pos, name, function):
+        super().__init__()
+        self.dim = dim
+        self.pos = pos
+        self.name = name
+        self.function = function
 
 class Position():
     CENTER = -1
@@ -250,11 +239,9 @@ class Menu(pygame.sprite.Sprite):
 # Inizializzazione
 menu = Menu(finestra.screen, 400, 300, 3, Position.CUSTOM(0), Position.Padding.CUSTOM(0), color=(200, 200, 200))
 menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8"])
-running_point = RunningPoint(schermox, schermoy, 0.001)
 clock = pygame.time.Clock()
 
 last_update_time = time.time()
-last_running_point_update = time.time()
 
 def dvd_effect_colorful(menu_obj, speed=2):
     import random
@@ -315,13 +302,7 @@ while True:
             finestra.resize(event.w, event.h)
             menu.screen = finestra.screen
             menu.resize()
-
-
-    # Ogni running_point.time secondi vengono aggiornate le coordinate del punto
-    if current_time - last_running_point_update >= running_point.time:
-        last_running_point_update = current_time
-        running_point.update()
-    
+  
     # REFRESH DELLO SCHERMO: solo ogni 1/fps secondi
     if current_time - last_update_time >= float(1/fps):
         last_update_time = current_time
@@ -330,10 +311,8 @@ while True:
         finestra.screen.fill((0, 0, 0))
         
         # Disegna tutto
-        running_point.draw(finestra.screen)
         menu.draw()
         dvd_effect_colorful(menu, speed=2)
         
         # Mostra le modifiche
         pygame.display.flip()
-    
