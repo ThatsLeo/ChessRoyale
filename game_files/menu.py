@@ -1,22 +1,17 @@
-import window_handler
-import pygame, sys
-import time
+import game_files.window_handler as window_handler
+import pygame
 
 pygame.init()
 
 
 fps = 60
 schermox, schermoy = 1280,720
-finestra = window_handler.window(schermox, schermoy, fps)
+#finestra = window_handler.window(schermox, schermoy, fps)
 
 
-class Tasto(pygame.sprite.Sprite):
-    def __init__(self, dim, pos, name, function):
-        super().__init__()
-        self.dim = dim
-        self.pos = pos
-        self.name = name
-        self.function = function
+
+
+        
 
 class Position():
     CENTER = -1
@@ -236,6 +231,9 @@ class Menu(pygame.sprite.Sprite):
 
         self.update_position()
 
+
+'''
+
 # Inizializzazione
 menu = Menu(finestra.screen, 400, 300, 3, Position.CUSTOM(0), Position.Padding.CUSTOM(0), color=(200, 200, 200))
 menu.set_options(["Start Game", "Options", "Palle", "Pene", "Exit", "Altro", "Opzione 7", "Opzione 8"])
@@ -285,6 +283,8 @@ def dvd_effect_colorful(menu_obj, speed=2):
     
     menu_obj.update_custom_position(new_x, new_y)
 
+
+
 # Game loop principale
 while True:
     current_time = time.time()
@@ -316,3 +316,4 @@ while True:
         
         # Mostra le modifiche
         pygame.display.flip()
+'''

@@ -2,6 +2,9 @@ import pygame
 from game_settings import tile_size
 from movement_holder import add_move
 
+# direzioni possibili (su, giù, sinistra, destra)
+directions = [(0,1), (0,-1), (1,0), (-1,0)]
+
 class Personaggio(pygame.sprite.Sprite):
     def __init__(self, start_cell, team):
         super().__init__()
@@ -35,8 +38,6 @@ class Personaggio(pygame.sprite.Sprite):
         queue = [(start, 0)]  # inizializzo la coda con il l'elemento di start, per ogni elemento salvo la distanza (qui 0)
         visited = set([start])
         self.parent[start] = None 
-        # direzioni possibili (su, giù, sinistra, destra)
-        directions = [(0,1), (0,-1), (1,0), (-1,0)]
 
         while len(queue) > 0: #finchè la coda non è vuota
             cell_, dist = queue.pop(0) #faccio il dequeue
@@ -85,6 +86,33 @@ class Personaggio(pygame.sprite.Sprite):
         self.possibili_attacchi.update(self.possibili_mosse) #ggiungo le celle di movimento che sono sempre anche di attacco
 
         return self.possibili_mosse, self.possibili_attacchi
+    
+    def calcola_attacchi(self, matrix):
+        rows = len(matrix)
+        cols = len(matrix[0])
+        queue = [(self.cur_cell, 0)]
+        visited_attack = set([self.cur_cell])
+        self.nemici_attaccabili = []
+
+        while len(queue) > 0:
+            cell_, dist = queue.pop(0)
+            if dist >= self.range:
+                continue
+
+            x, y = cell_.x, cell_.y
+
+            for dy, dx in directions:
+                ny = y + dy
+                nx = x + dx
+                if 0 <= ny < rows and 0 <= nx < cols:
+                    cell = matrix[ny][nx]
+                    if cell not in visited_attack:
+                        visited_attack.add(cell)
+                        queue.append((cell, dist + 1))
+                        if getattr(cell.entities,'team',self.team)!=self.team:
+                            self.nemici_attaccabili.append(cell)
+        return self.nemici_attaccabili
+
     def find_path(self, tile):
         self.path=[tile]
         cur_tile = tile

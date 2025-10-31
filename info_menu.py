@@ -1,13 +1,18 @@
 import pygame
 from game_settings import *
+from buttons import Tasto, test_fun, end_turn
 pygame.font.init()
 class InfoSection:
     def __init__(self, info_section_height):
         self.image = pygame.Surface((schermox,info_section_height))
         self.cell_name = ''
         self.cell_desc = ''
+        self.turn = Tasto((10,10), (0,0), 'FINE TURNO', end_turn, color="#0a27e7ff")
+        self.shop = Tasto((10,10), (0,0), 'SHOP', test_fun, color="#1aed06ff")
+        self.tasti = pygame.sprite.Group(self.turn, self.shop)
         self.resize(info_section_height)
     def resize(self, info_section_height):
+        self.info_section_height = info_section_height
         self.image= pygame.transform.scale(self.image, (schermox,info_section_height))
         img_padding=info_section_height/5
         self.img_dim = info_section_height*3/5
@@ -27,6 +32,13 @@ class InfoSection:
         self.desc_font = pygame.font.SysFont('maiandragd', desc_font_size)
         self.desc_x, self.desc_y = self.name_x, self.name_y*3.5
 
+        tasti_dim_x, tasti_dim_y = schermox/6,info_section_height/3
+        tasti_padding = tasti_dim_y/3
+        turn_pos = (schermox-tasti_dim_x-tasti_padding, tasti_padding)
+        shop_pos = (schermox-tasti_dim_x-tasti_padding, tasti_padding*2+tasti_dim_y)
+        self.turn.resize((tasti_dim_x, tasti_dim_y), turn_pos)
+        self.shop.resize((tasti_dim_x, tasti_dim_y), shop_pos)
+        
     def draw(self, display):
         display.blit(self.image,(0,tile_size*10))
         self.image.fill("#1F1152")
@@ -35,6 +47,7 @@ class InfoSection:
         
         self.image.blit(self.name_surface, (self.name_x, self.name_y))
         self.image.blit(self.desc_surface, (self.desc_x, self.desc_y))
+        self.tasti.draw(self.image)
         
 
     def update_info_menu(self, cell):
@@ -48,6 +61,10 @@ class InfoSection:
         else:
             self.cell_name = cell.name
             self.cell_desc = cell.desc
+    def check_tasti_click(self, mouse):
+        for tasto in self.tasti:
+            if tasto.image.get_rect(topleft=(tasto.pos[0],tasto.pos[1]+tile_size*10)).collidepoint(mouse):
+                tasto.activate()
         
 
 info_section = InfoSection(info_section_height)
