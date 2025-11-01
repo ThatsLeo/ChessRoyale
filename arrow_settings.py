@@ -18,7 +18,7 @@ def get_relative_pos(tile1,tile2):
 def arrowing(path):
     arrows=[]
     arrow_path=[]
-    if len(set(path))==1: return [],[]
+    if len(set(path))==1: return [],[] # caso in cui partenza e destinazione sono la stessa, la freccia non esiste
     for tile in range(len(path)):
         if path[tile]==path[0]: #caso della punta
             arrow = Arrow(path[tile], arrow_point)

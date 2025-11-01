@@ -1,6 +1,6 @@
 import pygame
 from game_settings import tile_size
-from movement_holder import add_move
+from movement_holder import add_move, add_shake, check_shaking
 
 # direzioni possibili (su, giù, sinistra, destra)
 directions = [(0,1), (0,-1), (1,0), (-1,0)]
@@ -12,18 +12,29 @@ class Personaggio(pygame.sprite.Sprite):
         self.cur_cell = start_cell #relativa cella in cui è dentro
         self.image = pygame.image.load('background_assets/nanodimerda.png')
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
+        self.rect = self.image.get_rect(topleft = self.pos)
         self.name = 'Nano di Merda'
         self.desc = 'è proprio un nano di merda!'
+        self.atk = 2
+        self.hp = 5
         self.range = 2 #range di attacco
-        self.rect = self.image.get_rect(topleft = self.pos)
         self.team = team
         if self.team==1:
             self.image=pygame.transform.rotate(self.image, 180)
+        self.attacking_enemy = False
+        self.attacked_enemy = None
+
     def update(self):
-        self.pos = self.cur_cell.rect.topleft
+        self.check_attack()
+        self.check_alive()
+        #self.pos = self.cur_cell.rect.topleft
         self.rect = self.image.get_rect(topleft = self.pos)
+
+    def check_alive(self): #se non ha più vita e non è in animazione di shake, viene rimosso
+        if self.hp <=0 and not check_shaking(self):
+            self.kill()
+
     def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
-        
         start = self.cur_cell
 
         self.possibili_mosse = [start]
@@ -124,11 +135,32 @@ class Personaggio(pygame.sprite.Sprite):
         return self.path
 
     def move(self, tile):
-        add_move(self, reversed(self.path[:-2]), moving_time=0.5) #alto moving time = più lento
+        targets = [x.pos for x in reversed(self.path[:-2])]
+        add_move(self, targets, moving_time=0.5) #alto moving time = più lento
         self.pos = tile.pos
         self.cur_cell.entities = None
         self.cur_cell.walkable = True
         tile.entities = self
         tile.walkable = False
         self.cur_cell = tile
+
+    def attack(self, enemy):
+        enemy_target_pos= ((enemy.pos[0]+self.cur_cell.pos[0])/2, (enemy.pos[1]+self.cur_cell.pos[1])/2)
+        add_move(self, [enemy_target_pos, self.cur_cell.pos], moving_time=0.2)
+        self.attacking_enemy = True
+        self.attacked_enemy = (enemy.entities, enemy_target_pos)
+
+    def check_attack(self):
+        if self.attacking_enemy: #se sta facendo l'animazione di attacco
+            if self.pos == self.attacked_enemy[1]:
+                self.attacked_enemy[0].get_damaged(self.atk)
+                self.attacking_enemy=False
+                self.attacked_enemy = None
+
+    def get_damaged_animation(self):
+        add_shake([self], 20, 0.7)
+    
+    def get_damaged(self, damage):
+        self.get_damaged_animation()
+        self.hp-=damage
         

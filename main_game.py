@@ -2,7 +2,7 @@ import pygame, sys
 from arrow_settings import arrowing
 from map_settings import *
 from game_settings import *
-from movement_holder import check_movement, moving_objects
+from movement_holder import check_movement
 from info_menu import *
 from buttons import *
 fpsclock=pygame.time.Clock()
@@ -66,7 +66,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             info_section.check_tasti_click(mouse)
             if not moving: #se si sta muovendo qualcosa blocca tutto 
-                if not game.used_movement:
+                if not game.used_movement: #se hai già usato il movimento questo turno, non puoi farlo di nuovo
                     if possibili_mosse and cella_attuale in possibili_mosse: #se clicchi in uno dei "quadrati blu"
                         flagged_cell.entities.move(cella_attuale) #muove la pedina in quel quadrato
                         flagged_cell.flagged = False #e rimuove i dovuti attributi
@@ -80,5 +80,12 @@ while True:
                             possibili_mosse, possibili_attacchi=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
                             cella_attuale.flagged = True
                             flagged_cell= cella_attuale
+                    else: #se clicchi una cella inutile, rimuove gli attributi e torna a non averla selezionata
+                        possibili_mosse = None
+                        cella_attuale.flagged = False
+                        flagged_cell= None
+                else:
+                    if cella_attuale in celle_attaccabili:
+                        flagged_cell.entities.attack(cella_attuale)
     pygame.display.update()
     fpsclock.tick(fps)

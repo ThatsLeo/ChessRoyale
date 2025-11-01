@@ -11,7 +11,7 @@ map=[
     '  X     ',
     '      M ',
     '    M   ',
-    '   M    ',
+    '   MX   ',
     ' MMM    ',
     '        ',
     '   N    ',
@@ -41,7 +41,7 @@ class Cella(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = pos)
     def shift(self, shift): #shift 1 se scende, -1 se sale
         add_move(self,[(self.pos[0],self.pos[1]+shift*tile_size)])
-        self.pos=(self.pos[0],self.pos[1]+tile_size*shift)
+        #self.pos=(self.pos[0],self.pos[1]+tile_size*shift)
         self.y=self.y+1*shift
 
 

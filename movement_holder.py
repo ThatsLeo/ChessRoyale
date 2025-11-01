@@ -4,11 +4,6 @@ from random import randint
 moving_objects={}
 
 def add_move(obj, targets, moving_time = 2):
-    if hasattr(obj, 'team'): #controlla se è una pedina 
-        temp=[]
-        for cell in targets:
-            temp.append(cell.pos) 
-        targets=temp
     moving_objects[str(id(obj))] = {'obj': obj, 'start': (obj.pos[0],obj.pos[1]), 'target': targets, 'time': 0, 'moving_time': moving_time}
 
 #obj: oggetto in questione
@@ -38,13 +33,16 @@ def check_movement():
         for tile in moving_objects.copy():
             obj = tile
             tile = moving_objects[tile]
-            if not tile['target']:
+            if not tile['target']: #caso in cui la pedina non si muove di alcuna casella
                 moving_objects.pop(obj)
-                continue
+                continue 
             tile['time']+=t
 
             time_ratio=tile['time']/tile['moving_time']
             if time_ratio>1: #ha raggiunto il primo target
+                tile['obj'].pos = tile['target'][0]
+                if getattr(tile['obj'], 'entities', None):
+                    tile['obj'].entities.pos = tile['target'][0]
                 tile['obj'].rect.x=tile['target'][0][0]
                 tile['obj'].rect.y=tile['target'][0][1]
                 tile['target'].pop(0)
@@ -56,8 +54,13 @@ def check_movement():
                     if getattr(tile['obj'], 'y', 5)>9 or getattr(tile['obj'], 'y', 5)<0: #se una cella va sotto o sopra lo schermo lo rimuove
                         tile['obj'].kill()
             else:
-                tile['obj'].rect.x=tile['start'][0]+(tile['target'][0][0]-tile['start'][0])*time_ratio
-                tile['obj'].rect.y=tile['start'][1]+(tile['target'][0][1]-tile['start'][1])*time_ratio
+                x = tile['start'][0]+(tile['target'][0][0]-tile['start'][0])*time_ratio
+                y = tile['start'][1]+(tile['target'][0][1]-tile['start'][1])*time_ratio
+                tile['obj'].pos = (x,y)
+                if getattr(tile['obj'], 'entities', None):
+                    tile['obj'].entities.pos = (x,y)
+                tile['obj'].rect.x = x
+                tile['obj'].rect.y = y
 
     if shaking_objects: 
         for tile in shaking_objects.copy():
@@ -74,4 +77,9 @@ def check_movement():
                     shaking_objects.pop(obj)
             else:
                 tile['obj'].rect.x=tile['default']+tile['offsets'][0]*time_ratio
+                if getattr(tile['obj'], 'entities', None): #se c'è una pedina in una casella che scuote, scuote anche essa
+                    tile['obj'].entities.pos = (tile['default']+tile['offsets'][0]*time_ratio,tile['obj'].entities.pos[1])
     return True
+
+def check_shaking(obj):
+    return True if str(id(obj)) in shaking_objects else False 
