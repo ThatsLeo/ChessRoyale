@@ -38,6 +38,9 @@ def check_movement():
         for tile in moving_objects.copy():
             obj = tile
             tile = moving_objects[tile]
+            if not tile['target']:
+                moving_objects.pop(obj)
+                continue
             tile['time']+=t
 
             time_ratio=tile['time']/tile['moving_time']

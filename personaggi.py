@@ -23,13 +23,13 @@ class Personaggio(pygame.sprite.Sprite):
         self.pos = self.cur_cell.rect.topleft
         self.rect = self.image.get_rect(topleft = self.pos)
     def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
-        #max_dist-=1 #levo 1 pk sennò ne conta una in più...
-        self.possibili_mosse = []
+        
+        start = self.cur_cell
+
+        self.possibili_mosse = [start]
         self.mosse_totali = []
         self.possibili_attacchi = set()
         self.parent = {} #questo servirà per costruire la freccia
-
-        start = self.cur_cell
 
         rows = len(matrix)
         cols = len(matrix[0])
@@ -81,7 +81,8 @@ class Personaggio(pygame.sprite.Sprite):
                     if cell not in visited_attack:
                         visited_attack.add(cell)
                         queue.append((cell, dist + 1))
-                        self.possibili_attacchi.add(cell)
+                        if cell!=start:
+                            self.possibili_attacchi.add(cell)
 
         self.possibili_attacchi.update(self.possibili_mosse) #ggiungo le celle di movimento che sono sempre anche di attacco
 

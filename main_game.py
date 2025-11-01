@@ -67,24 +67,18 @@ while True:
             info_section.check_tasti_click(mouse)
             if not moving: #se si sta muovendo qualcosa blocca tutto 
                 if not game.used_movement:
-                    if cella_attuale.flagged: #se clicchi di nuovo la stessa cella, rimuove gli attributi e torna a non averla selezionata
+                    if possibili_mosse and cella_attuale in possibili_mosse: #se clicchi in uno dei "quadrati blu"
+                        flagged_cell.entities.move(cella_attuale) #muove la pedina in quel quadrato
+                        flagged_cell.flagged = False #e rimuove i dovuti attributi
                         possibili_mosse = None
-                        cella_attuale.flagged = False
-                        flagged_cell= None
-                    else:
-                        if possibili_mosse and cella_attuale in possibili_mosse: #se clicchi in uno dei "quadrati blu"
-                            flagged_cell.entities.move(cella_attuale) #muove la pedina in quel quadrato
-                            flagged_cell.flagged = False #e rimuove i dovuti attributi
-                            possibili_mosse = None
+                        cella_attuale.flagged = True
+                        flagged_cell= cella_attuale
+                        game.used_movement=True
+
+                    elif cella_attuale.entities and game_field.get_rect(topleft= (0,0)).collidepoint(mouse): #se clicchi su una cella che ha un personaggio
+                        if game.turno == cella_attuale.entities.team: # puoi cliccare solo le pedine della squadra a cui tocca
+                            possibili_mosse, possibili_attacchi=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
                             cella_attuale.flagged = True
                             flagged_cell= cella_attuale
-
-                            game.used_movement=True
-
-                        elif cella_attuale.entities and game_field.get_rect(topleft= (0,0)).collidepoint(mouse): #se clicchi su una cella che ha un personaggio
-                            if game.turno == cella_attuale.entities.team: # puoi cliccare solo le pedine della squadra a cui tocca
-                                possibili_mosse, possibili_attacchi=cella_attuale.entities.calcola_mosse(map.matrix) #evidenzia le celle in cui esso può muoversi
-                                cella_attuale.flagged = True
-                                flagged_cell= cella_attuale
     pygame.display.update()
     fpsclock.tick(fps)
