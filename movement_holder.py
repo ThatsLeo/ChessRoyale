@@ -81,5 +81,7 @@ def check_movement():
                     tile['obj'].entities.pos = (tile['default']+tile['offsets'][0]*time_ratio,tile['obj'].entities.pos[1])
     return True
 
-def check_shaking(obj):
+def is_shaking(obj):
     return True if str(id(obj)) in shaking_objects else False 
+def any_moving():
+    return True if shaking_objects or moving_objects else False 

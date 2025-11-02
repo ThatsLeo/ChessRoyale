@@ -1,5 +1,6 @@
 from game_settings import game
 from map_settings import map
+from movement_holder import any_moving
 import pygame
 pygame.font.init()
 
@@ -40,10 +41,12 @@ class Tasto(pygame.sprite.Sprite):
             self.image.blit(parts[1], text_pos2)
 
 def end_turn():
-    map.update_map(game.turno)
-    game.turno = abs(game.turno-1) 
-    game.fine_turno=False
-    game.used_movement=False
+    if not any_moving():
+        map.update_map(game.turno)
+        game.turno = abs(game.turno-1) 
+        game.fine_turno = False
+        game.used_movement = False
+        game.used_attack = False
 
 def test_fun():
     print('diomerda')

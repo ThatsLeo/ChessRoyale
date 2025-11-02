@@ -1,6 +1,6 @@
 import pygame
 from game_settings import tile_size
-from movement_holder import add_move, add_shake, check_shaking
+from movement_holder import add_move, add_shake, is_shaking
 
 # direzioni possibili (su, giù, sinistra, destra)
 directions = [(0,1), (0,-1), (1,0), (-1,0)]
@@ -31,8 +31,8 @@ class Personaggio(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = self.pos)
 
     def check_alive(self): #se non ha più vita e non è in animazione di shake, viene rimosso
-        if self.hp <=0 and not check_shaking(self):
-            self.kill()
+        if self.hp <=0 and not is_shaking(self):
+            self.die()
 
     def calcola_mosse(self, matrix, max_dist=3): #utilizzando BFS
         start = self.cur_cell
@@ -163,4 +163,8 @@ class Personaggio(pygame.sprite.Sprite):
     def get_damaged(self, damage):
         self.get_damaged_animation()
         self.hp-=damage
+
+    def die(self):
+        self.kill()
+        self.cur_cell.entities = None
         
