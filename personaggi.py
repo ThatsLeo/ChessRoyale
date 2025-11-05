@@ -15,7 +15,7 @@ class Personaggio(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = self.pos)
         self.name = 'Nano di Merda'
         self.desc = 'è proprio un nano di merda!'
-        self.atk = 2
+        self.dmg = 2
         self.hp = 5
         self.range = 2 #range di attacco
         self.team = team
@@ -153,7 +153,7 @@ class Personaggio(pygame.sprite.Sprite):
     def check_attack(self):
         if self.attacking_enemy: #se sta facendo l'animazione di attacco
             if self.pos == self.attacked_enemy[1]:
-                self.attacked_enemy[0].get_damaged(self.atk)
+                self.attacked_enemy[0].get_damaged(self.dmg)
                 self.attacking_enemy=False
                 self.attacked_enemy = None
 
