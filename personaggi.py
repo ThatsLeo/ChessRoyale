@@ -4,13 +4,14 @@ from movement_holder import add_move, add_shake, is_shaking
 
 # direzioni possibili (su, giù, sinistra, destra)
 directions = [(0,1), (0,-1), (1,0), (-1,0)]
+nano_img = pygame.image.load('background_assets/nanodimerda.png')
 
 class Personaggio(pygame.sprite.Sprite):
     def __init__(self, start_cell, team):
         super().__init__()
         self.pos = start_cell.pos #posizione in pixel
         self.cur_cell = start_cell #relativa cella in cui è dentro
-        self.image = pygame.image.load('background_assets/nanodimerda.png')
+        self.image = nano_img
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft = self.pos)
         self.name = 'Nano di Merda'
@@ -167,4 +168,5 @@ class Personaggio(pygame.sprite.Sprite):
     def die(self):
         self.kill()
         self.cur_cell.entities = None
+        self.cur_cell.walkable = True
         

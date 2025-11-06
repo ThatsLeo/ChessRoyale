@@ -26,7 +26,6 @@ while True:
                     cambio_cella = True
                 cella_attuale=tile #individuiamo quale cella stiamo guardando
                 info_section.update_info_menu(cella_attuale)
-    else: cella_attuale = None
 
     game.moving = check_movement()
     if game.fine_turno: #check per la fine del turno
@@ -35,7 +34,9 @@ while True:
     screen.blit(game_field, (0,0))
     map.tiles.draw(game_field)
     nani.draw(game_field)
+    ostacoli.draw(game_field)
     nani.update()
+    ostacoli.update()
     if not game.moving and cella_attuale:
         game_field.blit(cursore,cella_attuale.pos)
     game_field.blit(zona_nemica,(0,0))

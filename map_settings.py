@@ -3,6 +3,7 @@ from personaggi import Personaggio
 from game_settings import *
 from random import choices
 from movement_holder import add_move, add_shake
+from ostacoli import Ostacolo
 grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
 mount_img = pygame.transform.scale(pygame.image.load('background_assets/montagna.png'), (tile_size, tile_size))
 
@@ -12,8 +13,8 @@ map=[
     '      M ',
     '    M   ',
     '   MX   ',
-    ' MMM    ',
-    '        ',
+    ' MMM  B ',
+    '     B  ',
     '   N    ',
     ' N  NN  ',
     '        ',
@@ -48,6 +49,7 @@ class Cella(pygame.sprite.Sprite):
 
 matrix=[] #matrice con tutte le tiles trasformate in classe Cella
 nani = pygame.sprite.Group()
+ostacoli = pygame.sprite.Group()
 
 for n_riga, riga in enumerate(map): #per ogni riga
     matrix_row=[]
@@ -68,6 +70,11 @@ for n_riga, riga in enumerate(map): #per ogni riga
             nano=Personaggio(cell, 1)
             nani.add(nano)
             cell.entities= nano
+            cell.walkable = False
+        elif tile=='B':
+            bomba=Ostacolo(cell)
+            ostacoli.add(bomba)
+            cell.entities= bomba
             cell.walkable = False
     matrix.append(matrix_row)
 
