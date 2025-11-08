@@ -17,7 +17,7 @@ class Personaggio(pygame.sprite.Sprite):
         self.name = 'Nano di Merda'
         self.desc = 'è proprio un nano di merda!'
         self.dmg = 2
-        self.hp = 5
+        self.hp = 1
         self.range = 2 #range di attacco
         self.team = team
         if self.team==1:

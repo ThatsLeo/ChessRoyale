@@ -2,9 +2,15 @@ class test:
     def __init__(self, name, func):
         self.name= name
         self.activate = func
-def tt():
-    print('uhh')
+    def tt(self):
+        print('uee')
 
-a = test('ciao', tt)
+class test2(test):
+    def __init__(self, name, func):
+        super().__init__(name, func)
+    def tt(self):
+        print('cia')
 
-a.activate()
+lis = [test, test2]
+a = lis[0]('gig', 2)
+print(type(a).__name__=='test')

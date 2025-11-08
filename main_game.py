@@ -28,19 +28,22 @@ while True:
                 info_section.update_info_menu(cella_attuale)
 
     game.moving = check_movement()
-    if game.fine_turno: #check per la fine del turno
-        end_turn()
         
     screen.blit(game_field, (0,0))
     map.tiles.draw(game_field)
     nani.draw(game_field)
     ostacoli.draw(game_field)
     nani.update()
-    ostacoli.update()
+    bombe.update(matrix=map.matrix, board=game_field)
+
     if not game.moving and cella_attuale:
         game_field.blit(cursore,cella_attuale.pos)
     game_field.blit(zona_nemica,(0,0))
     info_section.draw(screen)
+
+
+    if game.fine_turno: #check per la fine del turno
+        end_turn()
 
     if possibili_mosse:
         for mossa in possibili_attacchi: #tiles colorate blu e rosse
