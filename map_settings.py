@@ -2,7 +2,7 @@ import pygame
 from personaggi import Personaggio
 from game_settings import *
 from random import choices
-from movement_holder import add_move, add_shake
+from movement_holder import add_move, add_shake, is_shaking
 from ostacoli import Bomba
 grass_img = pygame.transform.scale(pygame.image.load('background_assets/cella.png'), (tile_size, tile_size))
 mount_img = pygame.transform.scale(pygame.image.load('background_assets/montagna.png'), (tile_size, tile_size))
@@ -70,13 +70,11 @@ for n_riga, riga in enumerate(map): #per ogni riga
         if tile=='N':
             nano=Personaggio(cell, 0)
             nani.add(nano)
-            cell.entities= nano
-            cell.walkable = False
+            cell.add_entity(nano)
         elif tile=='X':
             nano=Personaggio(cell, 1)
             nani.add(nano)
-            cell.entities= nano
-            cell.walkable = False
+            cell.add_entity(nano)
         elif tile=='B':
             bomba=Bomba(cell)
             ostacoli.add(bomba)
@@ -89,6 +87,9 @@ class Map:
     def __init__(self):
         self.matrix = matrix
         self.tiles = pygame.sprite.LayeredUpdates([x for xs in matrix for x in xs])
+        self.front_tiles = self.tiles.copy()
+        self.back_tiles = pygame.sprite.Group()
+        self.new_entities = pygame.sprite.Group()
     def generate_ground(self): #funzione che spawna una tile in modo random (pesata)
         tile_grounds = ['grass', 'mount']
         weights = [7, 1]
@@ -99,6 +100,7 @@ class Map:
         return choices(spawnable_entities, weights=weights)[0]
     def update_map(self, turn):
         new_row=[]
+        self.new_entities = pygame.sprite.Group()
         half = int(len(self.matrix)/2)
         if turn == 0: #ha appena giocato il giocatore sotto
             for cell in self.matrix[half-1]:
@@ -108,7 +110,7 @@ class Map:
                 if ground == 'grass' and rand_entity:
                     new_entity = rand_entity(new_cell)
                     new_cell.add_entity(new_entity)
-                    ostacoli.add(new_entity)
+                    self.new_entities.add(new_entity)
                     if type(new_entity).__name__=='Bomba': bombe.add(new_entity)
                 new_row.append(new_cell) #creo nuove celle nella nuova row usando la funzione random
             new_matrix = self.matrix[:half]
@@ -127,7 +129,7 @@ class Map:
                 if ground == 'grass' and rand_entity:
                     new_entity = rand_entity(new_cell)
                     new_cell.add_entity(new_entity)
-                    ostacoli.add(new_entity)
+                    self.new_entities.add(new_entity)
                     if type(new_entity).__name__=='Bomba': bombe.add(new_entity)
                 new_row.append(new_cell) #creo nuove celle nella nuova row usando la funzione random #creo nuove celle nella nuova row usando la funzione random
             new_matrix2 = self.matrix[half:]
@@ -139,12 +141,25 @@ class Map:
             new_matrix = self.matrix[1:half]
             new_matrix.append(new_row)
             new_matrix.extend(new_matrix2)
-        self.tiles.add(new_row, layer= self.tiles.get_bottom_layer()-1)
+        self.back_tiles.add(new_row)
+        self.tiles.add(new_row)
         self.matrix = new_matrix
         add_shake(self.tiles, 20, 2)
-        for n in nani:
-            if n.cur_cell not in self.tiles:
-                n.kill()
+    def has_end_shift(self):
+        if not is_shaking(self.matrix[0][0]) and self.back_tiles:
+            return True
+        return False
+    def update(self):
+        if self.has_end_shift():
+            self.front_tiles.add(self.back_tiles.sprites())
+            self.back_tiles.empty()
+            ostacoli.add(map.new_entities.sprites())
+            self.new_entities.empty()
+    def draw(self, screen):
+        self.back_tiles.draw(screen)
+        self.new_entities.draw(screen)
+        self.front_tiles.draw(screen)
+
 map=Map()
 
 

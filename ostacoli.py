@@ -101,6 +101,3 @@ class Bomba(Ostacolo):
             if c.entities and not getattr(c.entities, 'dead', False):
                 c.entities.hp-=self.dmg
                 c.entities.check_alive()
-    
-
-        

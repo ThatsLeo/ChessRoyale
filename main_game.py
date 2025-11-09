@@ -30,7 +30,10 @@ while True:
     game.moving = check_movement()
         
     screen.blit(game_field, (0,0))
-    map.tiles.draw(game_field)
+
+    map.update()
+    map.draw(game_field)
+
     nani.draw(game_field)
     ostacoli.draw(game_field)
     nani.update()
@@ -38,6 +41,7 @@ while True:
 
     if not game.moving and cella_attuale:
         game_field.blit(cursore,cella_attuale.pos)
+        
     game_field.blit(zona_nemica,(0,0))
     info_section.draw(screen)
 
